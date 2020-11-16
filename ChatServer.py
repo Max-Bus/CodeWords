@@ -25,19 +25,19 @@ def join_make_room(client, room):
     global Password_Length
     if(room == None):
         for room in Public:
-            if(room in Rooms.values() and len(Rooms[room][0])<8):
+            if(room in Rooms.keys() and len(Rooms[room][0])<8):
                 Rooms[room][0].append(client)
                 return (Rooms[room],room)
         # code from pynative.com
         letters = string.ascii_letters
-        result_str = ''.join(random.choice(letters) for i in range(LENGTH))
+        result_str = ''.join(random.choice(letters) for i in range(Password_Length))
 
         new_room = "!"+result_str
         board = Board(5)
         Rooms[new_room] = ([client],board)
         return (Rooms[new_room],new_room)
 
-    elif(room in Rooms.values() and len(Rooms[room][0])<8):
+    elif(room in Rooms.keys() and len(Rooms[room][0])<8):
         Rooms[room][0].append(client)
         return (Rooms[room],room)
 
@@ -50,16 +50,15 @@ def join_make_room(client, room):
 def leave_room(client,room):
     global Rooms
     global Public
-    if(room in Rooms.values()):
+    if(room in Rooms.keys()):
         Rooms[room][0].remove(client)
         if (len(Rooms[room][0])<1):
             del Rooms[room]
         if(room in Public):
             Public.remove(room)
         return True
-    else:
-        return False
 
+    return False
 
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
