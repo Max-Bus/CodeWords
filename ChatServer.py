@@ -19,7 +19,8 @@ Public = []
 Password_Length = 8
 
 class Server:
-    def join_make_room(client, room):
+    def join_make_room(self,client, room):
+        print("making_rooms")
         global Rooms
         global Public
         global Password_Length
@@ -47,7 +48,7 @@ class Server:
             Rooms[new_room] = ([client], board)
             return (Rooms[new_room],new_room)
 
-    def leave_room(client,room):
+    def leave_room(self,client,room):
         global Rooms
         global Public
         if(room in Rooms.keys()):
@@ -60,6 +61,7 @@ class Server:
 
         return False
 
+
 server = Server()
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.bind((HOST, PORT))
@@ -67,7 +69,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     while True:
         conn, addr = s.accept()
         print('Connected by', addr)
-        rm = ServerClientHandler(ClientConnectionData(conn,addr),server)
+        rm = ServerClientHandler(ClientConnectionData(conn, addr), server)
         executor.submit(rm.run)
         print("hi")
 

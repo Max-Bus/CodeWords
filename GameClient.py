@@ -17,15 +17,22 @@ class GameClient:
         pass
 
     def test(self):
-        msg2 = Message("JOIN")
-        msg2 = pickle.dumps(msg2)
+        raw = Message("JOIN")
+        msg = pickle.dumps(raw)
 
-        msg1 = pickle.dumps(sys.getsizeof(msg2))
-        print(msg2)
+        sizeOfMsg = sys.getsizeof(msg)
+        print(msg)
+        print(type(sizeOfMsg))
+        print(sizeOfMsg)
 
-        self.socket.sendall(msg1)
 
-        #self.socket.sendall(msg2)
+
+        data_size = sizeOfMsg.to_bytes(8,'big')
+
+        print(data_size)
+        self.socket.sendall(data_size)
+
+        self.socket.sendall(msg)
 
 if __name__ == '__main__':
     k = GameClient("localhost",54321)
