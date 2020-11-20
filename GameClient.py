@@ -16,7 +16,7 @@ class GameClient:
         #todo make into nice gui
         pass
 
-    def test(self):
+    def one_ping_only(self):
         #make message
         raw = Message("JOIN")
 
@@ -28,13 +28,15 @@ class GameClient:
 
         #serialize the integer into a 8 byte byte stream
         #most significant bit first
-        data_size = sizeOfMsg.to_bytes(8,'big')
+        dataSize = sizeOfMsg.to_bytes(8,'big')
 
         #send the size of the data
-        self.socket.sendall(data_size)
+        self.socket.sendall(dataSize)
         #send data
         self.socket.sendall(msg)
+        while 1:
+            pass
 
 if __name__ == '__main__':
     k = GameClient("localhost",54321)
-    k.test()
+    k.one_ping_only()
