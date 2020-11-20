@@ -1,7 +1,6 @@
 import socket
 from Message import Message
 import pickle
-from ClientServerHandler import *
 import time
 import sys
 from threading import Thread
@@ -13,6 +12,7 @@ class GameClient:
         self.port = port
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect((ip, port))
+
         # todo thread handle incoming
 
     def gui_interpreter(self, info):
@@ -42,7 +42,7 @@ class GameClient:
             pass
 
     def play(self):
-        listener = ClientServerHandler(self.socket)
+        listener = self.ServerHandler(self)
         thread = Thread(target=listener, daemon=True)
         thread.start()
 
@@ -72,6 +72,35 @@ class GameClient:
         self.one_ping_only()
 
 
+
+    class ServerHandler:
+
+        def __init__(self, client):
+            # client is the gui client instance
+            self.client = client
+
+            self.is_named = False
+
+        def __call__(self):
+
+            incoming = 'temp'
+
+            while not incoming is None:
+                # get size (represented as int 8 bytes) of the incoming message
+                size = self.client.socket.recv(8)
+                # turn the byte stream into an integer
+                data_size = int.from_bytes(size, 'big')
+                # read the corresponding number of bits
+                data = self.client.socket.recv(data_size)
+                # reconstitute Message from bytes
+                incoming = pickle.loads(data)
+
+                if incoming.TAG == 'SUBMITNAME':
+                    print('enter your username')
+
+                elif incoming.TAG == 'NAME':
+                    self.is_named = True
+                    print('welcome ' + incoming.text_message)
 
 
 if __name__ == '__main__':
