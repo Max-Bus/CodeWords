@@ -16,21 +16,24 @@ class ServerClientHandler(Thread):
     def run(self):
         print(' i am here ')
         while(True):
+            #this may need to be locked as it may not be thread safe
 
-
+            #get size of the incoming message
             size = self.client.socket.recv(8)
-            print(size)
-            data_size = int.from_bytes(size,'big')
-            print(data_size)
 
+            #turn the byte stream into an integer
+            data_size = int.from_bytes(size,'big')
+
+            #read the corresponding number of bits
             k = self.client.socket.recv(data_size)
-            print(k)
+
+            #reconstitute message from bytes
             request = pickle.loads(k)
-            print(request)
-            print(request.TAG)
+
             lock = threading.Lock()
             if request.TAG == "JOIN":
                 lock.acquire()
+                #this function should be locked
                 info, self.room = self.server.join_make_room(self.client, request.text_message)
                 lock.release()
                 self.client_list = info[0]
@@ -39,6 +42,7 @@ class ServerClientHandler(Thread):
                 break
             if request.TAG == "LEAVE":
                 lock.acquire()
+                # this function should be locked
                 self.server.leave_room(self.client, self.room)
                 lock.release()
         return

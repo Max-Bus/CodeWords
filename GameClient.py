@@ -17,21 +17,22 @@ class GameClient:
         pass
 
     def test(self):
+        #make message
         raw = Message("JOIN")
+
+        #serialize message
         msg = pickle.dumps(raw)
 
+        #get size of message in bytes
         sizeOfMsg = sys.getsizeof(msg)
-        print(msg)
-        print(type(sizeOfMsg))
-        print(sizeOfMsg)
 
-
-
+        #serialize the integer into a 8 byte byte stream
+        #most significant bit first
         data_size = sizeOfMsg.to_bytes(8,'big')
 
-        print(data_size)
+        #send the size of the data
         self.socket.sendall(data_size)
-
+        #send data
         self.socket.sendall(msg)
 
 if __name__ == '__main__':
