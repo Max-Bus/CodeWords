@@ -4,6 +4,7 @@ import pickle
 import time
 import sys
 from threading import Thread
+from GUIRunner import *
 
 class GameClient:
 
@@ -12,6 +13,8 @@ class GameClient:
         self.port = port
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect((ip, port))
+        self.gui = GUIRunner()
+
 
         # todo thread handle incoming
 
@@ -42,32 +45,34 @@ class GameClient:
             pass
 
     def play(self):
+        gui_thread = Thread(target=self.gui.run)
+        gui_thread.start()
+
         listener = self.ServerHandler(self)
-        thread = Thread(target=listener, daemon=True)
+        thread = Thread(target=listener)
         thread.start()
 
         # naming phase (line is the name)
-        line = input()
-        while not listener.is_named:
+        # line = input()
+        # while not listener.is_named:
+        #
+        #     # send the name to the server
+        #
+        #     name_msg = Message(TAG="SUBMITNAME", text_message=line)
+        #     # serialize message
+        #     serialized_msg = pickle.dumps(name_msg)
+        #     # get size (represented as int 8 bytes) of message in bytes
+        #     size_of_msg = sys.getsizeof(serialized_msg)
+        #     # serialize the integer into a 8 byte byte stream, most significant bit first
+        #     data_size = size_of_msg.to_bytes(8, 'big')
+        #     # send the size of the data
+        #     self.socket.sendall(data_size)
+        #     # send data
+        #     self.socket.sendall(serialized_msg)
+        #
+        #     # if failed, get name again
+        #     line = input()
 
-            # send the name to the server
-
-            name_msg = Message(TAG="SUBMITNAME", text_message=line)
-            # serialize message
-            serialized_msg = pickle.dumps(name_msg)
-            # get size (represented as int 8 bytes) of message in bytes
-            size_of_msg = sys.getsizeof(serialized_msg)
-            # serialize the integer into a 8 byte byte stream, most significant bit first
-            data_size = size_of_msg.to_bytes(8, 'big')
-            # send the size of the data
-            self.socket.sendall(data_size)
-            # send data
-            self.socket.sendall(serialized_msg)
-
-            # if failed, get name again
-            line = input()
-
-        print("hi")
         # next phase
         self.one_ping_only()
 
