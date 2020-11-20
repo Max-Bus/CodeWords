@@ -115,14 +115,32 @@ class GameChat(GridLayout):
         self.message_bar = TextInput(multiline=True)
         self.add_widget(self.message_bar)
 
-class KivyRunner(App):
-    def __init__(self):
-        super(KivyRunner, self).__init__()
+class FullGUI(GridLayout):
+    def __init__(self, **kwargs):
+        super(FullGUI, self).__init__(**kwargs)
+        self.cols = 1
+        self.rows = 1
+        self.lobby = Lobby()
+        self.add_widget(self.lobby)
+
+    def go_to_game(self):
+        self.remove_widget(self.lobby)
         self.gamegui = GameGUI()
+        self.add_widget(self.gamegui)
+
+    def return_to_lobby(self):
+        self.remove_widget(self.gamegui)
+        self.lobby = Lobby()
+        self.add_widget(self.lobby)
+
+class GUIRunner(App):
+    def __init__(self):
+        super(GUIRunner, self).__init__()
+        self.fullgui = FullGUI()
 
     def build(self):
-        return self.gamegui
+        return self.fullgui
 
 if __name__ == "__main__":
-    kv = KivyRunner()
-    kv.run()
+    gui = GUIRunner()
+    gui.run()
