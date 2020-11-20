@@ -67,7 +67,7 @@ class GameClient:
             # if failed, get name again
             line = input()
 
-
+        print("hi")
         # next phase
         self.one_ping_only()
 
@@ -105,4 +105,5 @@ class GameClient:
 
 if __name__ == '__main__':
     client = GameClient("localhost", 54321)
+   # client.one_ping_only()
     client.play()
