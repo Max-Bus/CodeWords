@@ -6,15 +6,21 @@ from kivy.uix.button import Button
 from kivy.uix.popup import Popup
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.textinput import TextInput
+import pickle
+import sys
+from Message import *
 
 class Lobby(GridLayout):
-    def __init__(self, **kwargs):
+    def __init__(self, socket, **kwargs):
         super(Lobby, self).__init__(**kwargs)
+        self.client_socket = socket
         self.cols = 1
         self.rows = 3
         self.add_widget(Label(text="Codewords"))
         self.add_widget(Button(text="Join Private Lobby", on_press=self.open_private))
         self.add_widget(Button(text="Join Public Lobby", on_press=self.open_public))
+        self.name_input = None
+        self.room_id_input = None
 
     def open_private(self, instance):
         popup_window = Popup(title="Private Lobby")
@@ -24,11 +30,19 @@ class Lobby(GridLayout):
         popup_window.content = content
         content.cols = 2
         content.rows = 3
+
+
+        self.name_input = TextInput(multiline=False)
         content.add_widget(Label(text="Name:"))
-        content.add_widget(TextInput(multiline=False))
+        content.add_widget(self.name_input)
+
+        self.room_id_input = TextInput(multiline=False)
         content.add_widget(Label(text="Room Code:"))
-        content.add_widget(TextInput(multiline=False))
+        content.add_widget(self.room_id_input)
+
         content.add_widget(Button(text="Back", on_press=popup_window.dismiss))
+
+        # todo send name and room id to server
         content.add_widget(Button(text="Join Private Lobby"))
 
         popup_window.open()
@@ -41,9 +55,17 @@ class Lobby(GridLayout):
         content.cols = 2
         content.rows = 2
         content.add_widget(Label(text="Name:"))
-        content.add_widget(TextInput(multiline=False))
+
+        self.name_input = TextInput(multiline=False)
+        content.add_widget(self.name_input)
         content.add_widget(Button(text="Back", on_press=popup_window.dismiss))
-        content.add_widget(Button(text="Join Public Lobby"))
+
+        # send name to server for verification when clicked
+        content.add_widget(Button(text="Join Public Lobby",
+                                  on_press=lambda event: send_msg(self.client_socket,
+                                                                  Message(TAG='SUBMITNAME', text_message=self.name_input.text))))
+
+
 
         popup_window.open()
 
@@ -116,11 +138,11 @@ class GameChat(GridLayout):
         self.add_widget(self.message_bar)
 
 class FullGUI(GridLayout):
-    def __init__(self, **kwargs):
+    def __init__(self, socket, **kwargs):
         super(FullGUI, self).__init__(**kwargs)
         self.cols = 1
         self.rows = 1
-        self.lobby = Lobby()
+        self.lobby = Lobby(socket)
         self.add_widget(self.lobby)
 
     def go_to_game(self):
@@ -133,13 +155,25 @@ class FullGUI(GridLayout):
         self.lobby = Lobby()
         self.add_widget(self.lobby)
 
-class GUIRunner(App):
-    def __init__(self):
-        super(GUIRunner, self).__init__()
-        self.fullgui = FullGUI()
+# class GUIRunner(App):
+#     def __init__(self):
+#         super(GUIRunner, self).__init__()
+#         self.fullgui = FullGUI()
+#
+#     def build(self):
+#         return self.fullgui
 
-    def build(self):
-        return self.fullgui
+def send_msg(socket, msg):
+    # serialize message
+    serialized_msg = pickle.dumps(msg)
+    # get size (represented as int 8 bytes) of message in bytes
+    size_of_msg = sys.getsizeof(serialized_msg)
+    # serialize the integer into a 8 byte byte stream, most significant bit first
+    data_size = size_of_msg.to_bytes(8, 'big')
+    # send the size of the data
+    socket.sendall(data_size)
+    # send data
+    socket.sendall(serialized_msg)
 
 if __name__ == "__main__":
     gui = GUIRunner()

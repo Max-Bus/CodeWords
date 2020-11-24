@@ -1,88 +1,40 @@
-import socket
-from Message import Message
-import pickle
-import time
-import sys
+import kivy
 from threading import Thread
+from kivy.app import App
+from kivy.uix.label import Label
+from kivy.uix.button import Button
+from kivy.uix.popup import Popup
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.textinput import TextInput
 from GUIRunner import *
+import socket
+import pickle
+from Message import Message
 
-class GameClient:
 
+class GameGUIClient(App):
     def __init__(self, ip, port):
+        super(GameGUIClient, self).__init__()
+
+        # socket connection stuff
         self.ip = ip
         self.port = port
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect((ip, port))
-        self.gui = GUIRunner()
 
 
-        # todo thread handle incoming
-
-    def gui_interpreter(self, info):
-        #todo make into nice gui
-        pass
-
-    def one_ping_only(self):
-        #make message
-        raw = Message("JOIN")
-
-        #serialize message
-        msg = pickle.dumps(raw)
-
-        #get size of message in bytes
-        sizeOfMsg = sys.getsizeof(msg)
-
-        #serialize the integer into a 8 byte byte stream
-        #most significant bit first
-        dataSize = sizeOfMsg.to_bytes(8, 'big')
-
-        #send the size of the data
-        self.socket.sendall(dataSize)
-        #send data
-        self.socket.sendall(msg)
-
-        while 1:
-            pass
-
-    def play(self):
-        gui_thread = Thread(target=self.gui.run)
-        gui_thread.start()
+    def build(self):
+        self.root = FullGUI(self.socket)
 
         listener = self.ServerHandler(self)
         thread = Thread(target=listener)
         thread.start()
 
-        # naming phase (line is the name)
-        # line = input()
-        # while not listener.is_named:
-        #
-        #     # send the name to the server
-        #
-        #     name_msg = Message(TAG="SUBMITNAME", text_message=line)
-        #     # serialize message
-        #     serialized_msg = pickle.dumps(name_msg)
-        #     # get size (represented as int 8 bytes) of message in bytes
-        #     size_of_msg = sys.getsizeof(serialized_msg)
-        #     # serialize the integer into a 8 byte byte stream, most significant bit first
-        #     data_size = size_of_msg.to_bytes(8, 'big')
-        #     # send the size of the data
-        #     self.socket.sendall(data_size)
-        #     # send data
-        #     self.socket.sendall(serialized_msg)
-        #
-        #     # if failed, get name again
-        #     line = input()
-
-        # next phase
-        self.one_ping_only()
-
-
 
     class ServerHandler:
-
         def __init__(self, client):
             # client is the gui client instance
-            self.client = client
+            self.gui_client = client
 
             self.is_named = False
 
@@ -90,13 +42,13 @@ class GameClient:
 
             incoming = 'temp'
 
-            while not incoming is None:
+            while incoming is not None:
                 # get size (represented as int 8 bytes) of the incoming message
-                size = self.client.socket.recv(8)
+                size = self.gui_client.socket.recv(8)
                 # turn the byte stream into an integer
                 data_size = int.from_bytes(size, 'big')
                 # read the corresponding number of bits
-                data = self.client.socket.recv(data_size)
+                data = self.gui_client.socket.recv(data_size)
                 # reconstitute Message from bytes
                 incoming = pickle.loads(data)
 
@@ -107,8 +59,6 @@ class GameClient:
                     self.is_named = True
                     print('welcome ' + incoming.text_message)
 
-
-if __name__ == '__main__':
-    client = GameClient("localhost", 54321)
-   # client.one_ping_only()
-    client.play()
+if __name__ == "__main__":
+    gui = GameGUIClient('localhost', 54321)
+    gui.run()
