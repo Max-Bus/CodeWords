@@ -3,12 +3,13 @@ import pickle
 import socket
 import sys
 from Message import *
+import re
 
 
 class ServerClientHandler(Thread):
 
     # list of other clients in the room, as well as the clientconnectiondata for this individual client
-    def __init__(self, client,server):
+    def __init__(self, client, server):
         super(ServerClientHandler, self).__init__()
         self.MAXPLAYERS = 8
         self.client_list = None
@@ -16,6 +17,7 @@ class ServerClientHandler(Thread):
         self.client = client
         self.board = None
         self.server = server
+
     def send_msg(self,msg):
         # serialize message
         serialized_msg = pickle.dumps(msg)
@@ -27,6 +29,7 @@ class ServerClientHandler(Thread):
         self.client.socket.sendall(data_size)
         # send data
         self.client.socket.sendall(serialized_msg)
+
     def get_msg(self):
         # get size of the incoming message
         size = self.client.socket.recv(8)
@@ -41,19 +44,21 @@ class ServerClientHandler(Thread):
         request = pickle.loads(data)
 
         return request
+
     def run(self):
         try:
             print('i am here ')
             # naming portion
 
-            name_msg = Message(TAG="SUBMITNAME")
-            self.send_msg(name_msg)
+            # name_msg = Message(TAG="SUBMITNAME")
+            # self.send_msg(name_msg)
 
             # listening loop
             while(True):
                 #this may need to be locked as it may not be thread safe
 
                 request = self.get_msg()
+                print('msg received: ' + request.TAG)
 
                 if request.TAG == "JOIN":
                     #this function should be locked
@@ -71,10 +76,26 @@ class ServerClientHandler(Thread):
                     self.server.leave_room(self.client, self.room)
 
                 elif request.TAG == 'SUBMITNAME':
-                    requested_name = request.text_message
+                    # todo
+                    requested_name = request.name
+                    if len(requested_name) > 3 and re.search(r'^[a-zA-Z0-9]*$', requested_name):
+                        # public room
+                        if request.text_message is None:
+                            self.send_msg(Message(TAG='NAMEACCEPT', name=requested_name))
 
-                    name_msg = Message(TAG="NAME", text_message=requested_name.upper())
-                    self.send_msg(name_msg)
+                        # private room
+                        else:
+                            room_id = request.text_message
+                            self.send_msg(Message(TAG='NAMEACCEPT', name=requested_name, text_message=room_id))
+
+                    # invalid name
+                    else:
+                        # todo, how will errors be handled?
+                        self.send_msg(Message(TAG='ERROR', text_message='name must be alphanumeric and at least length 4'))
+
+
+
+
         except socket.error:
             print('error: ' + str(self.client.ip_address) + ' leaving room')
             x = self.server.leave_room(self.client, self.room)
@@ -84,4 +105,5 @@ class ServerClientHandler(Thread):
                 print(str(self.client.ip_address)+" Failed to exit room")
                 print("shutting down connection")
             return
+
         return

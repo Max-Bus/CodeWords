@@ -42,8 +42,10 @@ class Lobby(GridLayout):
 
         content.add_widget(Button(text="Back", on_press=popup_window.dismiss))
 
-        # todo send name and room id to server
-        content.add_widget(Button(text="Join Private Lobby"))
+        # send name and room id to server
+        content.add_widget(Button(text="Join Private Lobby",
+                                  on_press=lambda event:
+                                  send_msg(self.client_socket, Message(TAG='SUBMITNAME', name=self.name_input.text, text_message=self.room_id_input.text))))
 
         popup_window.open()
 
@@ -62,9 +64,8 @@ class Lobby(GridLayout):
 
         # send name to server for verification when clicked
         content.add_widget(Button(text="Join Public Lobby",
-                                  on_press=lambda event: send_msg(self.client_socket,
-                                                                  Message(TAG='SUBMITNAME', text_message=self.name_input.text))))
-
+                                  on_press=lambda event:
+                                  send_msg(self.client_socket, Message(TAG='SUBMITNAME', name=self.name_input.text))))
 
 
         popup_window.open()
@@ -155,13 +156,6 @@ class FullGUI(GridLayout):
         self.lobby = Lobby()
         self.add_widget(self.lobby)
 
-# class GUIRunner(App):
-#     def __init__(self):
-#         super(GUIRunner, self).__init__()
-#         self.fullgui = FullGUI()
-#
-#     def build(self):
-#         return self.fullgui
 
 def send_msg(socket, msg):
     # serialize message
@@ -175,6 +169,3 @@ def send_msg(socket, msg):
     # send data
     socket.sendall(serialized_msg)
 
-if __name__ == "__main__":
-    gui = GUIRunner()
-    gui.run()

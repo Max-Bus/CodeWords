@@ -53,11 +53,16 @@ class GameGUIClient(App):
                 incoming = pickle.loads(data)
 
                 if incoming.TAG == 'SUBMITNAME':
+                    # todo delete (naming period is defined by user actions, not the server)
                     print('enter your username')
 
-                elif incoming.TAG == 'NAME':
+                elif incoming.TAG == 'NAMEACCEPT':
                     self.is_named = True
-                    print('welcome ' + incoming.text_message)
+                    print('welcome ' + incoming.name)
+
+                elif incoming.TAG == 'ERROR':
+                    # todo, error console?
+                    print(incoming.text_message)
 
 if __name__ == "__main__":
     gui = GameGUIClient('localhost', 54321)
