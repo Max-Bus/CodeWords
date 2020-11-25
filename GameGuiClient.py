@@ -52,17 +52,33 @@ class GameGUIClient(App):
                 # reconstitute Message from bytes
                 incoming = pickle.loads(data)
 
-                if incoming.TAG == 'SUBMITNAME':
-                    # todo delete (naming period is defined by user actions, not the server)
-                    print('enter your username')
 
-                elif incoming.TAG == 'NAMEACCEPT':
+                if incoming.TAG == 'ALLOWJOIN':
                     self.is_named = True
                     print('welcome ' + incoming.name)
+
+                    # send JOIN protocol
+                    self.send(Message(TAG='JOIN', name=incoming.name, text_message=incoming.text_message))
+
+
+                elif incoming.TAG == 'JOINSUCCESSFUL':
+                    self.gui_client.root.go_to_game()
 
                 elif incoming.TAG == 'ERROR':
                     # todo, error console?
                     print(incoming.text_message)
+
+        def send(self, msg):
+            # serialize message
+            serialized_msg = pickle.dumps(msg)
+            # get size (represented as int 8 bytes) of message in bytes
+            size_of_msg = sys.getsizeof(serialized_msg)
+            # serialize the integer into a 8 byte byte stream, most significant bit first
+            data_size = size_of_msg.to_bytes(8, 'big')
+            # send the size of the data
+            self.gui_client.socket.sendall(data_size)
+            # send data
+            self.gui_client.socket.sendall(serialized_msg)
 
 if __name__ == "__main__":
     gui = GameGUIClient('localhost', 54321)

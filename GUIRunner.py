@@ -71,8 +71,9 @@ class Lobby(GridLayout):
         popup_window.open()
 
 class GameGUI(GridLayout):
-    def __init__(self, **kwargs):
+    def __init__(self, socket, **kwargs):
         super(GameGUI, self).__init__(**kwargs)
+        self.socket = socket
         self.cols = 2
         self.rows = 1
 
@@ -108,7 +109,7 @@ class WordBoard(GridLayout):
                 col.append(b)
                 self.add_widget(b)
             self.board.append(col)
-        print(self.board)
+        # print(self.board)
 
     def set_words(self, words):
         for i in range(5):
@@ -141,6 +142,7 @@ class GameChat(GridLayout):
 class FullGUI(GridLayout):
     def __init__(self, socket, **kwargs):
         super(FullGUI, self).__init__(**kwargs)
+        self.socket = socket
         self.cols = 1
         self.rows = 1
         self.lobby = Lobby(socket)
@@ -148,12 +150,12 @@ class FullGUI(GridLayout):
 
     def go_to_game(self):
         self.remove_widget(self.lobby)
-        self.gamegui = GameGUI()
+        self.gamegui = GameGUI(self.socket)
         self.add_widget(self.gamegui)
 
     def return_to_lobby(self):
         self.remove_widget(self.gamegui)
-        self.lobby = Lobby()
+        self.lobby = Lobby(self.socket)
         self.add_widget(self.lobby)
 
 

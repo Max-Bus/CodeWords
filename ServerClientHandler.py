@@ -55,43 +55,55 @@ class ServerClientHandler(Thread):
 
             # listening loop
             while(True):
-                #this may need to be locked as it may not be thread safe
+                # this may need to be locked as it may not be thread safe
 
                 request = self.get_msg()
                 print('msg received: ' + request.TAG)
 
                 if request.TAG == "JOIN":
-                    #this function should be locked
+                    # this function should be locked
                     info, self.room = self.server.join_make_room(self.client, request.text_message)
                     self.client_list = info[0]
                     self.board = info[1]
-                    print("huzzah")
-                    print(self.board)
-                    print(self.client_list)
-                    print(self.room)
+
+                    # print("huzzah")
+                    # print(self.board)
+                    # print(self.client_list)
+                    # print(self.room)
+
+                    self.send_msg(Message(TAG='JOINSUCCESSFUL', text_message='joined room'))
+
+                    # log on server
+                    if request.text_message is None:
+                        print(request.name + ' has joined public room.')
+                    else:
+                        print(request.name + ' had joined private room ' + request.text_message + '.')
+
                     continue
 
                 elif request.TAG == "LEAVE":
                     # this function should be locked
                     self.server.leave_room(self.client, self.room)
 
+                # send their accepted name and send back the id if valid
                 elif request.TAG == 'SUBMITNAME':
                     # todo
                     requested_name = request.name
                     if len(requested_name) > 3 and re.search(r'^[a-zA-Z0-9]*$', requested_name):
                         # public room
                         if request.text_message is None:
-                            self.send_msg(Message(TAG='NAMEACCEPT', name=requested_name))
+                            self.send_msg(Message(TAG='ALLOWJOIN', name=requested_name))
 
                         # private room
                         else:
                             room_id = request.text_message
-                            self.send_msg(Message(TAG='NAMEACCEPT', name=requested_name, text_message=room_id))
+                            self.send_msg(Message(TAG='ALLOWJOIN', name=requested_name, text_message=room_id))
 
                     # invalid name
                     else:
                         # todo, how will errors be handled?
                         self.send_msg(Message(TAG='ERROR', text_message='name must be alphanumeric and at least length 4'))
+
 
 
 
