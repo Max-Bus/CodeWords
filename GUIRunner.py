@@ -21,13 +21,17 @@ class Lobby(GridLayout):
         self.add_widget(Button(text="Join Public Lobby", on_press=self.open_public))
         self.name_input = None
         self.room_id_input = None
+        self.popup = None
+    def scrub(self):
+        self.popup.dismiss()
+
 
     def open_private(self, instance):
-        popup_window = Popup(title="Private Lobby")
-        popup_window.size = (40, 40)
+        self.popup = Popup(title="Private Lobby")
+        self.popup_window.size = (40, 40)
 
         content = GridLayout()
-        popup_window.content = content
+        self.popup.content = content
         content.cols = 2
         content.rows = 3
 
@@ -40,27 +44,26 @@ class Lobby(GridLayout):
         content.add_widget(Label(text="Room Code:"))
         content.add_widget(self.room_id_input)
 
-        content.add_widget(Button(text="Back", on_press=popup_window.dismiss))
+        content.add_widget(Button(text="Back", on_press=self.popup.dismiss))
 
         # send name and room id to server
         content.add_widget(Button(text="Join Private Lobby",
                                   on_press=lambda event:
                                   send_msg(self.client_socket, Message(TAG='SUBMITNAME', name=self.name_input.text, text_message=self.room_id_input.text))))
 
-        popup_window.open()
+        self.popup.open()
 
     def open_public(self, instance):
-        popup_window = Popup(title="Public Lobby")
-
+        self.popup = Popup(title="Public Lobby")
         content = GridLayout()
-        popup_window.content = content
+        self.popup.content = content
         content.cols = 2
         content.rows = 2
         content.add_widget(Label(text="Name:"))
 
         self.name_input = TextInput(multiline=False)
         content.add_widget(self.name_input)
-        content.add_widget(Button(text="Back", on_press=popup_window.dismiss))
+        content.add_widget(Button(text="Back", on_press=self.popup.dismiss))
 
         # send name to server for verification when clicked
         content.add_widget(Button(text="Join Public Lobby",
@@ -68,7 +71,7 @@ class Lobby(GridLayout):
                                   send_msg(self.client_socket, Message(TAG='SUBMITNAME', name=self.name_input.text))))
 
 
-        popup_window.open()
+        self.popup.open()
 
 class GameGUI(GridLayout):
     def __init__(self, socket, **kwargs):
@@ -149,9 +152,11 @@ class FullGUI(GridLayout):
         self.add_widget(self.lobby)
 
     def go_to_game(self):
+        self.lobby.scrub()
         self.remove_widget(self.lobby)
         self.gamegui = GameGUI(self.socket)
         self.add_widget(self.gamegui)
+        self.do_layout()
 
     def return_to_lobby(self):
         self.remove_widget(self.gamegui)

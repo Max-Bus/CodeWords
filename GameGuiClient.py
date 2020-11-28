@@ -27,7 +27,7 @@ class GameGUIClient(App):
         self.root = FullGUI(self.socket)
 
         listener = self.ServerHandler(self)
-        thread = Thread(target=listener)
+        thread = Thread(target=listener,daemon= True)
         thread.start()
 
 
