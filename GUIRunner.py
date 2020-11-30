@@ -10,9 +10,9 @@ import pickle
 import sys
 from Message import *
 
-class Lobby(GridLayout):
+class StartMenu(GridLayout):
     def __init__(self, socket, **kwargs):
-        super(Lobby, self).__init__(**kwargs)
+        super(StartMenu, self).__init__(**kwargs)
         self.client_socket = socket
         self.cols = 1
         self.rows = 3
@@ -72,6 +72,21 @@ class Lobby(GridLayout):
 
 
         self.popup.open()
+
+class Lobby(GridLayout):
+    def __init__(self, socket, **kwargs):
+        super(Lobby, self).__init__(**kwargs)
+        self.client_socket = socket
+        self.cols = 1
+        self.rows = 5
+
+        self.add_widget(Label(text="Lobby"))
+        self.switch_button = Button(text="Switch Team")
+        self.add_widget(self.switch_button)
+        self.codemaster_button = Button(text="Become Codemaster")
+        self.add_widget(self.codemaster_button)
+        self.start_button = Button(text="Start Game")
+        self.add_widget(self.start_button)
 
 class GameGUI(GridLayout):
     def __init__(self, socket, **kwargs):
@@ -148,20 +163,20 @@ class FullGUI(GridLayout):
         self.socket = socket
         self.cols = 1
         self.rows = 1
-        self.lobby = Lobby(socket)
-        self.add_widget(self.lobby)
+        self.start_menu = StartMenu(socket)
+        self.add_widget(self.start_menu)
 
     def go_to_game(self):
-        self.lobby.scrub()
-        self.remove_widget(self.lobby)
+        self.start_menu.scrub()
+        self.remove_widget(self.start_menu)
         self.gamegui = GameGUI(self.socket)
         self.add_widget(self.gamegui)
         self.do_layout()
 
     def return_to_lobby(self):
         self.remove_widget(self.gamegui)
-        self.lobby = Lobby(self.socket)
-        self.add_widget(self.lobby)
+        self.start_menu = StartMenu(self.socket)
+        self.add_widget(self.start_menu)
 
 
 def send_msg(socket, msg):
