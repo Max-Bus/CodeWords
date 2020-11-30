@@ -9,6 +9,7 @@ from kivy.uix.textinput import TextInput
 import pickle
 import sys
 from Message import *
+import re
 
 class StartMenu(GridLayout):
     def __init__(self, socket, **kwargs):
@@ -154,6 +155,20 @@ class GameChat(GridLayout):
         self.add_widget(self.chat_log)
         self.message_bar = TextInput(multiline=True)
         self.add_widget(self.message_bar)
+
+
+        # rough method to be attached to button or command for sending a message
+        def chat(event):
+            # todo process whether it should be sent to team or everyone
+            chat_msg = self.message_bar.text.trim()
+
+            # one or more @ followed by a name would be sent as pchat
+            # todo make a better regex for this
+            if re.search(r'^(@[a-zA-Z0-9]+)+$', chat_msg):
+                send_msg(self.socket, Message(TAG='PCHAT', text_message=chat_msg))
+            else:
+                send_msg(self.socket, Message(TAG='CHAT', text_message=chat_msg))
+
 
 class FullGUI(GridLayout):
     def __init__(self, socket, **kwargs):
