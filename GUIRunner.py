@@ -24,8 +24,6 @@ class Lobby(GridLayout):
         self.popup = None
     def scrub(self):
         self.popup.dismiss()
-
-
     def open_private(self, instance):
         self.popup = Popup(title="Private Lobby")
         self.popup_window.size = (40, 40)

@@ -17,7 +17,23 @@ class ServerClientHandler(Thread):
         self.client = client
         self.board = None
         self.server = server
-
+    def broadcast(self,msg,team):
+        for recipient in self.client_list:
+            if(not team or (team and self.client.team == recipient.client.team)):
+                recipient.send_msg(msg)
+    def pchatprep(self,request):
+        msg = request.text_message
+        loc = msg.rfind("@")
+        for i in range(loc,len(request)):
+            if( msg[i]==' '):
+                msg = request.text_message[0:i]
+                request.text_message = self.client.name +" "+ request.text_message[i:]
+        recipients = [x.strip() for x in msg.split("@").strip()]
+        return recipients
+    def privatebroadcast(self,recipients,message):
+        for recipient in self.client_list:
+            if(recipient.client.name in recipients):
+                recipient.send_msg(message)
     def send_msg(self,msg):
         # serialize message
         serialized_msg = pickle.dumps(msg)
@@ -80,7 +96,21 @@ class ServerClientHandler(Thread):
                         print(request.name + ' had joined private room ' + request.text_message + '.')
 
                     continue
-
+                elif request.TAG=="CHAT":
+                    self.broadcast(request,False)
+                elif request.TAG == "TEAMCHAT":
+                    self.broadcast(request,True)
+                elif request.TAG == "PCHAT":
+                    recipients = self.pchatprep(request)
+                    self.privatebroadcast(recipients,request)
+                elif request.TAG == "CHOOSETEAM":
+                    #todo
+                elif request.TAG == "CHOOSECODEMASTER":
+                    #todo
+                elif request.TAG == "TURN":
+                    #todo
+                elif request.TAG == "CLUE":
+                    #todo
                 elif request.TAG == "LEAVE":
                     # this function should be locked
                     self.server.leave_room(self.client, self.room)
