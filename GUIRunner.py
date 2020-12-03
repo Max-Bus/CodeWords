@@ -80,6 +80,10 @@ class Lobby(GridLayout):
         self.rows = 5
 
         self.add_widget(Label(text="Lobby"))
+        self.role_table = GridLayout()
+        self.role_table.cols = 2
+        self.role_table.rows = 4
+        self.add_widget(self.role_table)
         self.switch_button = Button(text="Switch Team")
         self.add_widget(self.switch_button)
         self.codemaster_button = Button(text="Become Codemaster")
@@ -179,9 +183,16 @@ class FullGUI(GridLayout):
         self.start_menu = StartMenu(socket)
         self.add_widget(self.start_menu)
 
-    def go_to_game(self):
+    def go_to_lobby(self):
         self.start_menu.scrub()
         self.remove_widget(self.start_menu)
+        self.lobby = Lobby(self.socket)
+        self.add_widget(self.lobby)
+        self.do_layout()
+
+    def go_to_game(self):
+        self.lobby.scrub()
+        self.remove_widget(self.lobby)
         self.gamegui = GameGUI(self.socket)
         self.add_widget(self.gamegui)
         self.do_layout()
