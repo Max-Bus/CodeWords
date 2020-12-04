@@ -105,12 +105,16 @@ class ServerClientHandler(Thread):
                     self.privatebroadcast(recipients,request)
                 elif request.TAG == "CHOOSETEAM":
                     #todo
+                    pass
                 elif request.TAG == "CHOOSECODEMASTER":
                     #todo
+                    pass
                 elif request.TAG == "TURN":
                     #todo
+                    pass
                 elif request.TAG == "CLUE":
                     #todo
+                    pass
                 elif request.TAG == "LEAVE":
                     # this function should be locked
                     self.server.leave_room(self.client, self.room)

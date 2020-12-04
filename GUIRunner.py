@@ -158,20 +158,23 @@ class GameChat(GridLayout):
         self.chat_log = TextInput(multiline=True)
         self.add_widget(self.chat_log)
         self.message_bar = TextInput(multiline=True)
-        self.add_widget(self.message_bar)
+        self.message_area = GridLayout(rows=1,cols=2)
+        self.message_area.add_widget(self.message_bar)
+        self.message_button = Button(text="Send", on_press=self.chat)
+        self.message_area.add_widget(self.message_button)
+        self.add_widget(self.message_area)
 
+    # rough method to be attached to button or command for sending a message
+    def chat(self, instance):
+        # todo process whether it should be sent to team or everyone
+        chat_msg = self.message_bar.text.trim()
 
-        # rough method to be attached to button or command for sending a message
-        def chat(event):
-            # todo process whether it should be sent to team or everyone
-            chat_msg = self.message_bar.text.trim()
-
-            # one or more @ followed by a name would be sent as pchat
-            # todo make a better regex for this
-            if re.search(r'^(@[a-zA-Z0-9]+)+$', chat_msg):
-                send_msg(self.socket, Message(TAG='PCHAT', text_message=chat_msg))
-            else:
-                send_msg(self.socket, Message(TAG='CHAT', text_message=chat_msg))
+        # one or more @ followed by a name would be sent as pchat
+        # todo make a better regex for this
+        if re.search(r'^(@[a-zA-Z0-9]+)+$', chat_msg):
+            send_msg(self.socket, Message(TAG='PCHAT', text_message=chat_msg))
+        else:
+            send_msg(self.socket, Message(TAG='CHAT', text_message=chat_msg))
 
 
 class FullGUI(GridLayout):
