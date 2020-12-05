@@ -18,13 +18,16 @@ class StartMenu(GridLayout):
         self.cols = 1
         self.rows = 3
         self.add_widget(Label(text="Codewords"))
+
         self.add_widget(Button(text="Join Private Lobby", on_press=self.open_private))
         self.add_widget(Button(text="Join Public Lobby", on_press=self.open_public))
         self.name_input = None
         self.room_id_input = None
         self.popup = None
+
     def scrub(self):
         self.popup.dismiss()
+
     def open_private(self, instance):
         self.popup = Popup(title="Private Lobby")
         self.popup_window.size = (40, 40)
@@ -45,10 +48,11 @@ class StartMenu(GridLayout):
 
         content.add_widget(Button(text="Back", on_press=self.popup.dismiss))
 
-        # send name and room id to server
+        # send name and room id to server to join lobby
         content.add_widget(Button(text="Join Private Lobby",
                                   on_press=lambda event:
-                                  send_msg(self.client_socket, Message(TAG='SUBMITNAME', name=self.name_input.text, text_message=self.room_id_input.text))))
+                                  send_msg(self.client_socket, Message(TAG='LOBBYREQUEST', name=self.name_input.text, roomid=self.room_id_input.text))))
+
 
         self.popup.open()
 
@@ -67,7 +71,7 @@ class StartMenu(GridLayout):
         # send name to server for verification when clicked
         content.add_widget(Button(text="Join Public Lobby",
                                   on_press=lambda event:
-                                  send_msg(self.client_socket, Message(TAG='SUBMITNAME', name=self.name_input.text))))
+                                  send_msg(self.client_socket, Message(TAG='LOBBYREQUEST', name=self.name_input.text))))
 
 
         self.popup.open()
@@ -88,7 +92,12 @@ class Lobby(GridLayout):
         self.add_widget(self.switch_button)
         self.codemaster_button = Button(text="Become Codemaster")
         self.add_widget(self.codemaster_button)
-        self.start_button = Button(text="Start Game")
+
+        # send request to join game
+        self.start_button = Button(text="Start Game",
+                                   on_press=lambda event:
+                                   send_msg(self.client_socket, Message(TAG='GAMEREQUEST')))
+
         self.add_widget(self.start_button)
 
 class GameGUI(GridLayout):
@@ -184,6 +193,7 @@ class FullGUI(GridLayout):
         self.cols = 1
         self.rows = 1
         self.start_menu = StartMenu(socket)
+        self.lobby = None
         self.add_widget(self.start_menu)
 
     def go_to_lobby(self):
@@ -194,7 +204,6 @@ class FullGUI(GridLayout):
         self.do_layout()
 
     def go_to_game(self):
-        self.lobby.scrub()
         self.remove_widget(self.lobby)
         self.gamegui = GameGUI(self.socket)
         self.add_widget(self.gamegui)

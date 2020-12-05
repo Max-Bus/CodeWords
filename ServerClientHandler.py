@@ -87,7 +87,7 @@ class ServerClientHandler(Thread):
                     # print(self.client_list)
                     # print(self.room)
 
-                    self.send_msg(Message(TAG='JOINSUCCESSFUL', text_message='joined room'))
+                    self.send_msg(Message(TAG='GOTOLOBBY'))
 
                     # log on server
                     if request.text_message is None:
@@ -119,24 +119,29 @@ class ServerClientHandler(Thread):
                     # this function should be locked
                     self.server.leave_room(self.client, self.room)
 
+
                 # send their accepted name and send back the id if valid
-                elif request.TAG == 'SUBMITNAME':
+                elif request.TAG == 'LOBBYREQUEST':
                     # todo
                     requested_name = request.name
                     if len(requested_name) > 3 and re.search(r'^[a-zA-Z0-9]*$', requested_name):
+                        print(request.name)
                         # public room
-                        if request.text_message is None:
-                            self.send_msg(Message(TAG='ALLOWJOIN', name=requested_name))
+                        if request.roomid is None:
+                            self.send_msg(Message(TAG='ALLOWJOINGAME', name=requested_name))
 
                         # private room
                         else:
-                            room_id = request.text_message
-                            self.send_msg(Message(TAG='ALLOWJOIN', name=requested_name, text_message=room_id))
+                            room_id = request.roomid
+                            self.send_msg(Message(TAG='ALLOWJOINGAME', name=requested_name, roomid=room_id))
 
                     # invalid name
                     else:
                         # todo, how will errors be handled?
                         self.send_msg(Message(TAG='ERROR', text_message='name must be alphanumeric and at least length 4'))
+
+                elif request.TAG == 'GAMEREQUEST':
+                    self.send_msg(Message(TAG='GOTOGAME'))
 
 
 

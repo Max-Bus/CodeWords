@@ -53,15 +53,17 @@ class GameGUIClient(App):
                 incoming = pickle.loads(data)
 
 
-                if incoming.TAG == 'ALLOWJOIN':
+                if incoming.TAG == 'ALLOWJOINGAME':
                     self.is_named = True
                     print('welcome ' + incoming.name)
 
                     # send JOIN protocol
                     self.send(Message(TAG='JOIN', name=incoming.name, text_message=incoming.text_message))
 
+                elif incoming.TAG == 'GOTOLOBBY':
+                    self.gui_client.root.go_to_lobby()
 
-                elif incoming.TAG == 'JOINSUCCESSFUL':
+                elif incoming.TAG == 'GOTOGAME':
                     self.gui_client.root.go_to_game()
 
                 elif incoming.TAG == 'ERROR':
