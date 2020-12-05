@@ -30,7 +30,7 @@ class StartMenu(GridLayout):
 
     def open_private(self, instance):
         self.popup = Popup(title="Private Lobby")
-        self.popup_window.size = (40, 40)
+        self.popup.size = (40, 40)
 
         content = GridLayout()
         self.popup.content = content
@@ -116,7 +116,7 @@ class GameGUI(GridLayout):
         self.left_side.add_widget(self.hint_area)
         self.add_widget(self.left_side)
 
-        self.game_chat = GameChat()
+        self.game_chat = GameChat(self.socket)
         self.game_chat.size_hint = (None, None)
 
         self.add_widget(self.game_chat)
@@ -159,10 +159,12 @@ class HintArea(GridLayout):
         self.current_hint.text = word + ", " + str(count)
 
 class GameChat(GridLayout):
-    def __init__(self, **kwargs):
+    def __init__(self, socket, **kwargs):
         super(GameChat, self).__init__(**kwargs)
         self.cols = 1
         self.rows = 2
+
+        self.socket = socket
 
         self.chat_log = TextInput(multiline=True)
         self.add_widget(self.chat_log)
@@ -176,7 +178,7 @@ class GameChat(GridLayout):
     # rough method to be attached to button or command for sending a message
     def chat(self, instance):
         # todo process whether it should be sent to team or everyone
-        chat_msg = self.message_bar.text.trim()
+        chat_msg = self.message_bar.text.strip()
 
         # one or more @ followed by a name would be sent as pchat
         # todo make a better regex for this

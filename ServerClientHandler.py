@@ -97,6 +97,7 @@ class ServerClientHandler(Thread):
 
                     continue
                 elif request.TAG=="CHAT":
+                    print('chat received: ' + request.text_message)
                     self.broadcast(request,False)
                 elif request.TAG == "TEAMCHAT":
                     self.broadcast(request,True)
