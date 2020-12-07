@@ -17,6 +17,7 @@ class ServerClientHandler(Thread):
         self.client = client
         self.board = None
         self.server = server
+        self.clued = False
     def broadcast(self,msg,team):
         for recipient in self.client_list:
             if(not team or (team and self.client.team == recipient.client.team)):
@@ -28,7 +29,9 @@ class ServerClientHandler(Thread):
             if( msg[i]==' '):
                 msg = request.text_message[0:i]
                 request.text_message = self.client.name +" "+ request.text_message[i:]
+                break
         recipients = [x.strip() for x in msg.split("@").strip()]
+        recipients.append(self.client.name)
         return recipients
     def privatebroadcast(self,recipients,message):
         for recipient in self.client_list:
@@ -45,7 +48,18 @@ class ServerClientHandler(Thread):
         self.client.socket.sendall(data_size)
         # send data
         self.client.socket.sendall(serialized_msg)
-
+    def maketurn(self,turn):
+        if(self.board[turn[0]][turn[1]].selected):
+            return
+        self.board[turn[0]][turn[1]].selected = True
+        txtmsg = True
+        if(not self.board[turn[0]][turn[1]].color == self.client.team):
+            txtmsg = False
+            self.board.turn = not self.board.turn
+            self.clued = False
+        txtmsg = txtmsg
+        msg = Message(TAG="BOARD",text_message=txtmsg,board=self.board)
+        self.broadcast(msg,False)
     def get_msg(self):
         # get size of the incoming message
         size = self.client.socket.recv(8)
@@ -75,10 +89,10 @@ class ServerClientHandler(Thread):
 
                 request = self.get_msg()
                 print('msg received: ' + request.TAG)
-
                 if request.TAG == "JOIN":
                     # this function should be locked
-                    info, self.room = self.server.join_make_room(self.client, request.text_message)
+                    print("here")
+                    info, self.room = self.server.join_make_room(self, request.text_message)
                     self.client_list = info[0]
                     self.board = info[1]
 
@@ -105,17 +119,20 @@ class ServerClientHandler(Thread):
                     recipients = self.pchatprep(request)
                     self.privatebroadcast(recipients,request)
                 elif request.TAG == "CHOOSETEAM":
-                    #todo
-                    pass
+                    if(not self.client.team == request.text_message):
+                        self.client.is_codemaster = False
+                    self.client.team = request.text_message
                 elif request.TAG == "CHOOSECODEMASTER":
-                    #todo
-                    pass
-                elif request.TAG == "TURN":
-                    #todo
-                    pass
+                    if not self.client.is_codemaster and self.client.team is not None:
+                        self.client.is_codemaster = True
+                elif request.TAG == "GAMEREQUEST":
+                    if (self.board.turn == self.client.team and not self.client.is_codemaster):
+                        self.maketurn(request.turn)
                 elif request.TAG == "CLUE":
-                    #todo
-                    pass
+                    if self.client.is_codemaster and self.board.turn == self.client.team and not self.clued:
+                        self.clued = True
+                        msg = Message(TAG="CLUE",text_message=request.text_message)
+                        self.broadcast(msg,False)
                 elif request.TAG == "LEAVE":
                     # this function should be locked
                     self.server.leave_room(self.client, self.room)
@@ -150,7 +167,7 @@ class ServerClientHandler(Thread):
 
         except socket.error:
             print('error: ' + str(self.client.ip_address) + ' leaving room')
-            x = self.server.leave_room(self.client, self.room)
+            x = self.server.leave_room(self, self.room)
             if x:
                 print(str(self.client.ip_address)+" Exited successfully")
             else:

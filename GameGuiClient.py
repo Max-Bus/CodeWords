@@ -63,6 +63,13 @@ class GameGUIClient(App):
                 elif incoming.TAG == 'GOTOLOBBY':
                     self.gui_client.root.go_to_lobby()
 
+                elif incoming.TAG == 'CHAT':
+                    print(incoming.text_message)
+
+                elif incoming.TAG == 'BOARD':
+                    print("BOARD")
+                    print(incoming.board)
+
                 elif incoming.TAG == 'GOTOGAME':
                     self.gui_client.root.go_to_game()
 
