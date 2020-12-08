@@ -54,17 +54,21 @@ class ServerClientHandler(Thread):
         self.client.socket.sendall(serialized_msg)
 
     def maketurn(self,turn):
-        if(self.board[turn[0]][turn[1]].selected):
+        print(str(turn[0])+" "+str(turn[1]))
+
+        if(self.board.board[turn[0]][turn[1]].selected):
             return
-        self.board[turn[0]][turn[1]].selected = True
-        if(not self.board[turn[0]][turn[1]].color == self.client.team):
+
+        self.board.board[turn[0]][turn[1]].selected = True
+        if(self.board.board[turn[0]][turn[1]].color != self.client.team):
             self.board.turn = (1,0)[self.board.turn==1]
             self.clued = False
 
         msg = Message(TAG="BOARDUPDATE", board=self.board)
+
         self.broadcast(msg, False)
 
-        if (self.board[turn[0]][turn[1]].color == -2):
+        if (self.board.board[turn[0]][turn[1]].color == -2):
             msg = Message(TAG="WIN", text_message=((self.client.team+1)%2))
             self.broadcast(msg, False)
 
@@ -73,7 +77,7 @@ class ServerClientHandler(Thread):
             if(not Win):
                 break
             for j in range(self.board.dim):
-                if(self.board[i][j].selected == False and self.board[i][j].color==self.client.team):
+                if(self.board.board[i][j].selected == False and self.board.board[i][j].color==self.client.team):
                     Win=False
                     break
 
@@ -160,8 +164,8 @@ class ServerClientHandler(Thread):
 
                 # todo perhaps consider renaming this
                 elif request.TAG == "GAMEREQUEST":
-                    if (self.board.turn == self.client.team and not self.client.is_codemaster):
-                        self.maketurn(request.move)
+                    #if (self.board.turn == self.client.team and not self.client.is_codemaster):
+                    self.maketurn(request.move)
 
                 elif request.TAG == "CLUE":
                     if self.client.is_codemaster and self.board.turn == self.client.team and not self.clued:

@@ -13,7 +13,7 @@ class Board:
 
         for x in range(dim):
             for y in range(dim):
-                self.board[x][y] = (Word(wordList[x*y+y], wordValues[x*y+y]))
+                self.board[x][y] = (Word(wordList[x*dim+y], wordValues[x*dim+y]))
 
 
 

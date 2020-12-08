@@ -187,8 +187,8 @@ class WordBoard(GridLayout):
         if switch_turns:
             self.is_turn = not self.is_turn
 
-        for row in range(len(self.board)):
-            for col in range(len(self.board[0])):
+        for row in range(len(board)):
+            for col in range(len(board[0])):
                 color_int = board[row][col].color
                 color = None
                 if color_int == 1:
