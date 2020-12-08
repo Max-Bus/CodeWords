@@ -141,13 +141,14 @@ class ServerClientHandler(Thread):
                     self.privatebroadcast(recipients,request)
 
                 elif request.TAG == "CHOOSETEAM":
-                    if(not self.client.team == request.text_message):
+                    if(self.client.team != request.text_message):
                         self.client.is_codemaster = False
                     self.client.team = request.text_message
 
                     self.send_msg(Message(TAG='TEAMSELECTED', text_message=self.client.team))
 
                 elif request.TAG == "CHOOSECODEMASTER":
+                    # todo team is a number right? + check for teamates?
                     if not self.client.is_codemaster and self.client.team is not None:
                         self.client.is_codemaster = True
 

@@ -90,14 +90,17 @@ class Lobby(GridLayout):
         self.add_widget(self.role_table)
         self.switch_button = Button(text="Switch Team")
         self.add_widget(self.switch_button)
-        self.codemaster_button = Button(text="Become Codemaster")
+
+
+        self.codemaster_button = Button(text="Become Codemaster",
+                                        on_press=lambda event:
+                                        send_msg(self.client_socket, Message(TAG='CHOOSECODEMASTER')))
         self.add_widget(self.codemaster_button)
-        self.start_ticket = Message(TAG='STARTGAME')
 
         # send request to join game
         self.start_button = Button(text="Start Game",
                                    on_press=lambda event:
-                                   send_msg(self.client_socket, self.start_ticket))
+                                   send_msg(self.client_socket, Message(TAG='STARTGAME')))
 
         self.add_widget(self.start_button)
 
@@ -166,6 +169,7 @@ class WordBoard(GridLayout):
         self.is_turn = is_turn
         self.cols = len(board[0])
         self.rows = len(board)
+
 
         self.btn_board = [['temp'] * self.cols] * self.rows
         for i in range(self.rows):

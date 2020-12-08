@@ -66,7 +66,7 @@ class GameGUIClient(App):
 
                 elif incoming.TAG == 'STARTGAME':
                     # open gameboard
-
+                    print(len(incoming.board.board[0]))
                     self.gui_client.root.go_to_game(incoming.board.board,
                                                     (not incoming.text_message and self.gui_client.team == '0') or (incoming.text_message and self.gui_client.team == '1'))
 
