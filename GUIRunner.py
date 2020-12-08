@@ -171,7 +171,7 @@ class WordBoard(GridLayout):
         self.rows = len(board)
 
 
-        self.btn_board = [['temp'] * self.cols] * self.rows
+        self.btn_board = [(['temp'] * self.cols) for row in range(self.rows)]
         for i in range(self.rows):
             for j in range(self.cols):
                 m = Message(TAG='GAMEREQUEST', move=(i, j))
@@ -183,6 +183,24 @@ class WordBoard(GridLayout):
                 self.btn_board[i][j] = b
 
     # todo update board
+    def update_board(self, board, switch_turns):
+        if switch_turns:
+            self.is_turn = not self.is_turn
+
+        for row in range(len(self.board)):
+            for col in range(len(self.board[0])):
+                color_int = board[row][col].color
+                color = None
+                if color_int == 1:
+                    color = (1, 0, 0, 1)
+                elif color_int == 0:
+                    color = (0, 0, 1, 1)
+                elif color_int == -1:
+                    color = (0.5, 0.5, 0.5, 0.5)
+                else:
+                    color = (1, 1, 1, 1)
+
+                self.btn_board[row][col].background_color = color
     # self.board[i][j].text = words[i][j]
 
 class HintArea(GridLayout):

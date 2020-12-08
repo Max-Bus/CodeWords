@@ -78,7 +78,9 @@ class GameGUIClient(App):
                     #     self.gui_client.root.gamegui.word_board.set_initial_board(incoming.board, False)
 
                 elif incoming.TAG == 'BOARDUPDATE':
+                    print('updating board')
                     #todo
+                    self.gui_client.root.gamegui.word_board.update_board(incoming.board.board, False)
                     pass
 
 
