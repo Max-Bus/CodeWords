@@ -57,14 +57,30 @@ class ServerClientHandler(Thread):
         if(self.board[turn[0]][turn[1]].selected):
             return
         self.board[turn[0]][turn[1]].selected = True
-        txtmsg = True
         if(not self.board[turn[0]][turn[1]].color == self.client.team):
-            txtmsg = False
-            self.board.turn = not self.board.turn
+            self.board.turn = (1,0)[self.board.turn==1]
             self.clued = False
-        txtmsg = txtmsg
-        msg = Message(TAG="BOARD",text_message=txtmsg,board=self.board)
-        self.broadcast(msg,False)
+
+        msg = Message(TAG="BOARD", board=self.board)
+        self.broadcast(msg, False)
+
+        if (self.board[turn[0]][turn[1]].color == -2):
+            msg = Message(TAG="WIN", text_message=((self.client.team+1)%2))
+            self.broadcast(msg, False)
+
+        Win = True
+        for i in range(self.board.dim):
+            if(not Win):
+                break
+            for j in range(self.board.dim):
+                if(self.board[i][j].selected == False and self.board[i][j].color==self.client.team):
+                    Win=False
+                    break
+
+        if(Win):
+            msg = Message(TAG="WIN",text_message=self.client.team)
+            self.broadcast(msg, False)
+
 
     def get_msg(self):
         # get size of the incoming message
