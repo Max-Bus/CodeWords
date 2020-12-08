@@ -21,7 +21,7 @@ class GameGUIClient(App):
         self.port = port
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect((ip, port))
-        self.team = False
+        self.team = '1'
 
 
     def build(self):
@@ -66,18 +66,16 @@ class GameGUIClient(App):
 
                 elif incoming.TAG == 'STARTGAME':
                     # open gameboard
-                    print(123456)
-                    self.gui_client.root.go_to_game()
-                    print("BOARD")
 
-                    # print('team' + str(self.team))
-                    # print(incoming.text_message)
-                    # print(incoming.board)
-                    # todo make nicer + fix logic
-                    if (not incoming.text_message and self.team == '0') or (incoming.text_message and self.team == '1'):
-                        self.gui_client.root.gamegui.word_board.set_initial_board(incoming.board, True)
-                    else:
-                        self.gui_client.root.gamegui.word_board.set_initial_board(incoming.board, False)
+                    self.gui_client.root.go_to_game(incoming.board.board,
+                                                    (not incoming.text_message and self.gui_client.team == '0') or (incoming.text_message and self.gui_client.team == '1'))
+
+
+                    # # todo make nicer + fix logic
+                    # if (not incoming.text_message and self.gui_client.team == '0') or (incoming.text_message and self.gui_client.team == '1'):
+                    #     self.gui_client.root.gamegui.word_board.set_initial_board(incoming.board, True)
+                    # else:
+                    #     self.gui_client.root.gamegui.word_board.set_initial_board(incoming.board, False)
 
                 elif incoming.TAG == 'BOARDUPDATE':
                     #todo
