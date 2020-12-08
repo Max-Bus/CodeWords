@@ -21,6 +21,7 @@ class GameGUIClient(App):
         self.port = port
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect((ip, port))
+        self.team = False
 
 
     def build(self):
@@ -60,18 +61,38 @@ class GameGUIClient(App):
                     # send JOIN protocol
                     self.send(Message(TAG='JOIN', name=incoming.name, text_message=incoming.text_message))
 
+                elif incoming.TAG == 'TEAMSELECTED':
+                    self.team = incoming.text_message
+
+                elif incoming.TAG == 'STARTGAME':
+                    # open gameboard
+                    print(123456)
+                    self.gui_client.root.go_to_game()
+                    print("BOARD")
+
+                    # print('team' + str(self.team))
+                    # print(incoming.text_message)
+                    # print(incoming.board)
+                    # todo make nicer + fix logic
+                    if (not incoming.text_message and self.team == '0') or (incoming.text_message and self.team == '1'):
+                        self.gui_client.root.gamegui.word_board.set_initial_board(incoming.board, True)
+                    else:
+                        self.gui_client.root.gamegui.word_board.set_initial_board(incoming.board, False)
+
+                elif incoming.TAG == 'BOARDUPDATE':
+                    #todo
+                    pass
+
+
                 elif incoming.TAG == 'GOTOLOBBY':
+                    print('i am here now')
                     self.gui_client.root.go_to_lobby()
 
                 elif incoming.TAG == 'CHAT':
                     print(incoming.text_message)
 
-                elif incoming.TAG == 'BOARD':
-                    print("BOARD")
-                    print(incoming.board)
-
-                elif incoming.TAG == 'GOTOGAME':
-                    self.gui_client.root.go_to_game()
+                # elif incoming.TAG == 'GOTOGAME':
+                #     self.gui_client.root.go_to_game()
 
                 elif incoming.TAG == 'ERROR':
                     # todo, error console?

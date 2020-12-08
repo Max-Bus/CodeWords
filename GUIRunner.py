@@ -92,11 +92,12 @@ class Lobby(GridLayout):
         self.add_widget(self.switch_button)
         self.codemaster_button = Button(text="Become Codemaster")
         self.add_widget(self.codemaster_button)
+        self.start_ticket = Message(TAG='STARTGAME')
 
         # send request to join game
         self.start_button = Button(text="Start Game",
                                    on_press=lambda event:
-                                   send_msg(self.client_socket, Message(TAG='GAMEREQUEST')))
+                                   send_msg(self.client_socket, self.start_ticket))
 
         self.add_widget(self.start_button)
 
@@ -110,7 +111,7 @@ class GameGUI(GridLayout):
         self.left_side = GridLayout()
         self.left_side.cols = 1
         self.left_side.rows = 2
-        self.word_board = WordBoard()
+        self.word_board = WordBoard(self.socket)
         self.hint_area = HintArea()
         self.left_side.add_widget(self.word_board)
         self.left_side.add_widget(self.hint_area)
@@ -125,9 +126,27 @@ class GameGUI(GridLayout):
 
         self.left_side.size = (self.left_side.parent.width, self.left_side.parent.height)
 
+
 class WordBoard(GridLayout):
-    def __init__(self, **kwargs):
+    # def __init__(self, board, is_turn, **kwargs):
+    #     super(WordBoard, self).__init__(**kwargs)
+    #     self.is_turn = is_turn
+    #     self.cols = len(board.board[0])
+    #     self.rows = len(board.board)
+    #
+    #     self.btn_board = []
+    #     for i in range(self.cols):
+    #         row = []
+    #         for j in range(self.rows):
+    #             b = Button(text="Word")
+    #             row.append(b)
+    #             self.add_widget(b)
+    #         self.btn_board.append(row)
+
+    def __init__(self, socket, **kwargs):
         super(WordBoard, self).__init__(**kwargs)
+        self.socket = socket
+        self.is_turn = False
         self.cols = 5
         self.rows = 5
 
@@ -141,10 +160,24 @@ class WordBoard(GridLayout):
             self.board.append(col)
         # print(self.board)
 
-    def set_words(self, words):
-        for i in range(5):
-            for j in range(5):
-                self.board[i][j].text = words[i][j]
+    def set_initial_board(self, board, is_turn):
+        self.is_turn = is_turn
+        self.cols = len(board.board[0])
+        self.rows = len(board.board)
+
+        self.board = [['temp'] * self.cols] * self.rows
+        for i in range(self.rows):
+            for j in range(self.cols):
+                m = Message(TAG='GAMEREQUEST', move=(i, j))
+
+                # if is player's team's turn, send move; if not, send None
+                b = Button(text=board.board[i, j].word,
+                           on_press=lambda event: send_msg(self.socket, m) if self.is_turn else None)
+                self.add_widget(b)
+                self.board[i][j] = b
+
+    # todo update board
+    # self.board[i][j].text = words[i][j]
 
 class HintArea(GridLayout):
     def __init__(self, **kwargs):
@@ -196,6 +229,7 @@ class FullGUI(GridLayout):
         self.rows = 1
         self.start_menu = StartMenu(socket)
         self.lobby = None
+        self.gamegui = None
         self.add_widget(self.start_menu)
 
     def go_to_lobby(self):
@@ -206,6 +240,7 @@ class FullGUI(GridLayout):
         self.do_layout()
 
     def go_to_game(self):
+        print('drawing game')
         self.remove_widget(self.lobby)
         self.gamegui = GameGUI(self.socket)
         self.add_widget(self.gamegui)
@@ -228,4 +263,3 @@ def send_msg(socket, msg):
     socket.sendall(data_size)
     # send data
     socket.sendall(serialized_msg)
-

@@ -18,10 +18,12 @@ class ServerClientHandler(Thread):
         self.board = None
         self.server = server
         self.clued = False
+
     def broadcast(self,msg,team):
         for recipient in self.client_list:
             if(not team or (team and self.client.team == recipient.client.team)):
                 recipient.send_msg(msg)
+
     def pchatprep(self,request):
         msg = request.text_message
         loc = msg.rfind("@")
@@ -33,10 +35,12 @@ class ServerClientHandler(Thread):
         recipients = [x.strip() for x in msg.split("@").strip()]
         recipients.append(self.client.name)
         return recipients
+
     def privatebroadcast(self,recipients,message):
         for recipient in self.client_list:
             if(recipient.client.name in recipients):
                 recipient.send_msg(message)
+
     def send_msg(self,msg):
         # serialize message
         serialized_msg = pickle.dumps(msg)
@@ -48,6 +52,7 @@ class ServerClientHandler(Thread):
         self.client.socket.sendall(data_size)
         # send data
         self.client.socket.sendall(serialized_msg)
+
     def maketurn(self,turn):
         if(self.board[turn[0]][turn[1]].selected):
             return
@@ -60,6 +65,7 @@ class ServerClientHandler(Thread):
         txtmsg = txtmsg
         msg = Message(TAG="BOARD",text_message=txtmsg,board=self.board)
         self.broadcast(msg,False)
+
     def get_msg(self):
         # get size of the incoming message
         size = self.client.socket.recv(8)
@@ -91,15 +97,11 @@ class ServerClientHandler(Thread):
                 print('msg received: ' + request.TAG)
                 if request.TAG == "JOIN":
                     # this function should be locked
-                    print("here")
+                    #self.send_msg(Message(TAG='GOTOLOBBY'))
+
                     info, self.room = self.server.join_make_room(self, request.text_message)
                     self.client_list = info[0]
                     self.board = info[1]
-
-                    # print("huzzah")
-                    # print(self.board)
-                    # print(self.client_list)
-                    # print(self.room)
 
                     self.send_msg(Message(TAG='GOTOLOBBY'))
 
@@ -110,29 +112,46 @@ class ServerClientHandler(Thread):
                         print(request.name + ' had joined private room ' + request.text_message + '.')
 
                     continue
+
                 elif request.TAG=="CHAT":
                     print('chat received: ' + request.text_message)
                     self.broadcast(request,False)
+
                 elif request.TAG == "TEAMCHAT":
                     self.broadcast(request,True)
+
                 elif request.TAG == "PCHAT":
                     recipients = self.pchatprep(request)
                     self.privatebroadcast(recipients,request)
+
                 elif request.TAG == "CHOOSETEAM":
                     if(not self.client.team == request.text_message):
                         self.client.is_codemaster = False
                     self.client.team = request.text_message
+
+                    self.send_msg(Message(TAG='TEAMSELECTED', text_message=self.client.team))
+
                 elif request.TAG == "CHOOSECODEMASTER":
                     if not self.client.is_codemaster and self.client.team is not None:
                         self.client.is_codemaster = True
+
+
+                elif request.TAG == 'STARTGAME':
+                    # distribute initial board
+                    # todo randomize start team
+                    self.send_msg(Message(TAG='STARTGAME', board=self.board, text_message=True))
+
+                # todo perhaps consider renaming this
                 elif request.TAG == "GAMEREQUEST":
                     if (self.board.turn == self.client.team and not self.client.is_codemaster):
                         self.maketurn(request.turn)
+
                 elif request.TAG == "CLUE":
                     if self.client.is_codemaster and self.board.turn == self.client.team and not self.clued:
                         self.clued = True
                         msg = Message(TAG="CLUE",text_message=request.text_message)
                         self.broadcast(msg,False)
+
                 elif request.TAG == "LEAVE":
                     # this function should be locked
                     self.server.leave_room(self.client, self.room)
@@ -157,10 +176,6 @@ class ServerClientHandler(Thread):
                     else:
                         # todo, how will errors be handled?
                         self.send_msg(Message(TAG='ERROR', text_message='name must be alphanumeric and at least length 4'))
-
-                elif request.TAG == 'GAMEREQUEST':
-                    self.send_msg(Message(TAG='GOTOGAME'))
-
 
 
 
