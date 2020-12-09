@@ -145,10 +145,11 @@ class ServerClientHandler(Thread):
                     recipients = self.pchatprep(request)
                     self.privatebroadcast(recipients,request)
 
-                elif request.TAG == "CHOOSETEAM":
-                    if(self.client.team != request.text_message):
-                        self.client.is_codemaster = False
-                    self.client.team = request.text_message
+                elif request.TAG == "SWITCHTEAM":
+                    #if(self.client.team != request.text_message):
+                    self.client.is_codemaster = False
+                    #self.client.team = request.text_message
+                    self.client.team = (1 + self.client.team) % 2
 
                     self.send_msg(Message(TAG='TEAMSELECTED', text_message=self.client.team))
 
@@ -156,6 +157,8 @@ class ServerClientHandler(Thread):
                     # todo team is a number right? + check for teamates?
                     if not self.client.is_codemaster and self.client.team is not None:
                         self.client.is_codemaster = True
+
+                    # todo send to client to let them know
 
 
                 elif request.TAG == 'STARTGAME':

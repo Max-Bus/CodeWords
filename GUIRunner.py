@@ -73,7 +73,6 @@ class StartMenu(GridLayout):
                                   on_press=lambda event:
                                   send_msg(self.client_socket, Message(TAG='LOBBYREQUEST', name=self.name_input.text))))
 
-
         self.popup.open()
 
 class Lobby(GridLayout):
@@ -88,7 +87,10 @@ class Lobby(GridLayout):
         self.role_table.cols = 2
         self.role_table.rows = 4
         self.add_widget(self.role_table)
-        self.switch_button = Button(text="Switch Team")
+
+        self.switch_button = Button(text="Switch Team",
+                                    on_press = lambda event:
+                                    send_msg(self.client_socket, Message(TAG='SWITCHTEAM')))
         self.add_widget(self.switch_button)
 
 
