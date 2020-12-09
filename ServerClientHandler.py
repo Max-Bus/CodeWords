@@ -4,6 +4,7 @@ import socket
 import sys
 from Message import *
 import re
+import time
 
 
 class ServerClientHandler(Thread):
@@ -50,6 +51,7 @@ class ServerClientHandler(Thread):
         # serialize the integer into a 8 byte byte stream, most significant bit first
         data_size = size_of_msg.to_bytes(8, 'big')
         # send the size of the data
+        print(size_of_msg)
         self.client.socket.sendall(data_size)
         # send data
         self.client.socket.sendall(serialized_msg)
@@ -68,11 +70,13 @@ class ServerClientHandler(Thread):
         msg = Message(TAG="BOARDUPDATE", board=self.board)
         self.broadcast(msg, False)
 
-        # todo win code
-        # if (self.board.board[turn[0]][turn[1]].color == -2):
-        #     msg = Message(TAG="WIN", text_message=((self.client.team+1)%2))
-        #     self.broadcast(msg, False)
-        #
+
+        #if (self.board.board[turn[0]][turn[1]].color == -2):
+        #    winningteam = ((self.board.turn+1)%2)
+        #    time.sleep(1)
+        #    msg = Message(TAG="WIN", text_message=winningteam)
+        #    self.broadcast(msg, False)
+
         # Win = True
         # for i in range(self.board.dim):
         #     if(not Win):

@@ -48,12 +48,13 @@ class GameGUIClient(App):
                 size = self.gui_client.socket.recv(8)
                 # turn the byte stream into an integer
                 data_size = int.from_bytes(size, 'big')
+                print(data_size)
                 # read the corresponding number of bits
                 data = self.gui_client.socket.recv(data_size)
                 # reconstitute Message from bytes
                 incoming = pickle.loads(data)
 
-
+                print(incoming.TAG)
                 if incoming.TAG == 'ALLOWJOINGAME':
                     self.is_named = True
                     print('welcome ' + incoming.name)
