@@ -7,6 +7,7 @@ import re
 import random
 
 
+
 class ServerClientHandler(Thread):
 
     # list of other clients in the room, as well as the clientconnectiondata for this individual client
@@ -17,6 +18,7 @@ class ServerClientHandler(Thread):
         self.room = None
         self.client = client
         self.client.team = random.choice([0,1])
+        print(str(self.client.team))
         self.board = None
         self.server = server
         self.clued = False
@@ -152,7 +154,7 @@ class ServerClientHandler(Thread):
                     self.client.is_codemaster = False
                     #self.client.team = request.text_message
                     self.client.team = (1 + self.client.team) % 2
-
+                    print("new team:"+str(self.client.team))
                     self.send_msg(Message(TAG='TEAMSELECTED', text_message=self.client.team))
 
                 elif request.TAG == "CHOOSECODEMASTER":
