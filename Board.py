@@ -15,8 +15,6 @@ class Board:
             for y in range(dim):
                 self.board[x][y] = (Word(wordList[x*dim+y], wordValues[x*dim+y]))
 
-
-
 class Word:
     #should color be an int instead?
     def __init__(self, word, color):

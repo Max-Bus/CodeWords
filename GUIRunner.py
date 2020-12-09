@@ -170,15 +170,15 @@ class WordBoard(GridLayout):
         self.cols = len(board[0])
         self.rows = len(board)
 
-
         self.btn_board = [(['temp'] * self.cols) for row in range(self.rows)]
         for i in range(self.rows):
             for j in range(self.cols):
-                m = Message(TAG='GAMEREQUEST', move=(i, j))
 
                 # if is player's team's turn, send move; if not, send None
                 b = Button(text=board[i][j].word,
-                           on_press=lambda event: send_msg(self.socket, m) if self.is_turn else None)
+                           on_press=lambda event, i=i, j=j:
+                           send_msg(self.socket, Message(TAG='GAMEREQUEST', move=(i, j))) if self.is_turn else None)
+
                 self.add_widget(b)
                 self.btn_board[i][j] = b
 
@@ -189,18 +189,20 @@ class WordBoard(GridLayout):
 
         for row in range(len(board)):
             for col in range(len(board[0])):
-                color_int = board[row][col].color
-                color = None
-                if color_int == 1:
-                    color = (1, 0, 0, 1)
-                elif color_int == 0:
-                    color = (0, 0, 1, 1)
-                elif color_int == -1:
-                    color = (0.5, 0.5, 0.5, 0.5)
-                else:
-                    color = (1, 1, 1, 1)
+                if board[row][col].selected:
+                    color_int = board[row][col].color
+                    color = None
+                    if color_int == 1:
+                        color = (1, 0, 0, 1)
+                    elif color_int == 0:
+                        color = (0, 0, 1, 1)
+                    elif color_int == -1:
+                        color = (0.5, 0.5, 0.5, 0.5)
+                    else:
+                        color = (1, 1, 1, 1)
 
-                self.btn_board[row][col].background_color = color
+                    self.btn_board[row][col].background_color = color
+
     # self.board[i][j].text = words[i][j]
 
 class HintArea(GridLayout):
