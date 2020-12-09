@@ -80,6 +80,7 @@ class GameGUIClient(App):
 
                 elif incoming.TAG == 'BOARDUPDATE':
                     print('updating board')
+                    print(str(incoming.text_message))
                     #todo
                     self.gui_client.root.gamegui.word_board.update_board(incoming.board.board, False)
                     pass

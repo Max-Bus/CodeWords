@@ -4,7 +4,7 @@ import socket
 import sys
 from Message import *
 import re
-import time
+import random
 
 
 class ServerClientHandler(Thread):
@@ -16,6 +16,7 @@ class ServerClientHandler(Thread):
         self.client_list = None
         self.room = None
         self.client = client
+        self.client.team = random.choice([0,1])
         self.board = None
         self.server = server
         self.clued = False
@@ -67,28 +68,25 @@ class ServerClientHandler(Thread):
             self.board.turn = (1,0)[self.board.turn==1]
             self.clued = False
 
-        msg = Message(TAG="BOARDUPDATE", board=self.board)
+
+        winner = None
+        if (self.board.board[turn[0]][turn[1]].color == -2):
+            winner = ((self.board.turn+1)%2)
+            print("here")
+        Win = True
+        for i in range(self.board.dim):
+            for j in range(self.board.dim):
+                if (self.board.board[i][j].selected == False and self.board.board[i][j].color == self.client.team):
+                    Win = False
+                    break
+        print(winner)
+        print(Win)
+        print(self.client.team)
+        if (Win):
+            winner = self.client.team
+        print(winner)
+        msg = Message(TAG="BOARDUPDATE", board=self.board,text_message=winner)
         self.broadcast(msg, False)
-
-
-        #if (self.board.board[turn[0]][turn[1]].color == -2):
-        #    winningteam = ((self.board.turn+1)%2)
-        #    time.sleep(1)
-        #    msg = Message(TAG="WIN", text_message=winningteam)
-        #    self.broadcast(msg, False)
-
-        # Win = True
-        # for i in range(self.board.dim):
-        #     if(not Win):
-        #         break
-        #     for j in range(self.board.dim):
-        #         if(self.board.board[i][j].selected == False and self.board.board[i][j].color==self.client.team):
-        #             Win=False
-        #             break
-        #
-        # if(Win):
-        #     msg = Message(TAG="WIN",text_message=self.client.team)
-        #     self.broadcast(msg, False)
 
 
     def get_msg(self):
@@ -173,8 +171,10 @@ class ServerClientHandler(Thread):
                 # todo perhaps consider renaming this
                 elif request.TAG == "GAMEREQUEST":
                     print(request.move)
-                    #if (self.board.turn == self.client.team and not self.client.is_codemaster):
-                    self.maketurn(request.move)
+                    if(self.client.team is None):
+                        break
+                    if (self.board.turn == self.client.team and not self.client.is_codemaster):
+                        self.maketurn(request.move)
 
                 elif request.TAG == "CLUE":
                     if self.client.is_codemaster and self.board.turn == self.client.team and not self.clued:
