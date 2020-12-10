@@ -171,7 +171,6 @@ class WordBoard(GridLayout):
         self.is_turn = is_turn
         self.cols = len(board[0])
         self.rows = len(board)
-
         self.btn_board = [(['temp'] * self.cols) for row in range(self.rows)]
         for i in range(self.rows):
             for j in range(self.cols):
@@ -183,6 +182,7 @@ class WordBoard(GridLayout):
 
                 self.add_widget(b)
                 self.btn_board[i][j] = b
+        self.update_board(board,False)
 
     # todo update board
     def update_board(self, board, switch_turns):

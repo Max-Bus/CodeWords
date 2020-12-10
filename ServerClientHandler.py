@@ -183,12 +183,13 @@ class ServerClientHandler(Thread):
                 elif request.TAG == 'STARTGAME':
                     # distribute initial board
                     # todo randomize start team
-                    self.send_msg(Message(TAG='STARTGAME', board=self.board, text_message=True))
-                    if(self.client.is_codemaster):
+                    if (self.client.is_codemaster):
                         for i in range(len(self.board.board)):
-                            for j in range(len(self.board[i])):
-                                self.boardClone[i][j].color=self.board.board[i][j]
-                                self.boardClone[i][j].selected =True
+                            for j in range(len(self.board.board[i])):
+                                self.boardClone.board[i][j].color = self.board.board[i][j].color
+                                self.boardClone.board[i][j].selected = True
+                    self.send_msg(Message(TAG='STARTGAME', board=self.boardClone, text_message=True))
+
 
                 # todo perhaps consider renaming this
                 elif request.TAG == "GAMEREQUEST":
