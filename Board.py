@@ -15,6 +15,14 @@ class Board:
         for x in range(dim):
             for y in range(dim):
                 self.board[x][y] = Word(wordList[x*dim+y], wordValues[x*dim+y])
+    def copy(self):
+        b = Board(self.dim)
+        b.turn = self.turn
+        for i in range(b.dim):
+            for j in range(b.dim):
+                b.board[i][j]=self.board[i][j].copy()
+        return b
+
 
 class Word:
     #should color be an int instead?
@@ -22,3 +30,7 @@ class Word:
         self.word = word
         self.color = color
         self.selected = False
+    def copy(self):
+        w = Word(self.word,self.color)
+        w.selected = self.selected
+        return w

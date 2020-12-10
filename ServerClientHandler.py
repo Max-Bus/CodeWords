@@ -5,7 +5,7 @@ import sys
 from Message import *
 import re
 import random
-
+import copy
 
 
 class ServerClientHandler(Thread):
@@ -22,6 +22,7 @@ class ServerClientHandler(Thread):
         self.board = None
         self.server = server
         self.clued = False
+        self.boardClone = None
 
     def broadcast(self,msg,team):
         print(msg.TAG)
@@ -70,7 +71,6 @@ class ServerClientHandler(Thread):
             self.board.turn = (1,0)[self.board.turn==1]
             self.clued = False
 
-
         winner = None
         if (self.board.board[turn[0]][turn[1]].color == -2):
             winner = ((self.board.turn+1)%2)
@@ -81,13 +81,13 @@ class ServerClientHandler(Thread):
                 if (self.board.board[i][j].selected == False and self.board.board[i][j].color == self.client.team):
                     Win = False
                     break
-        print(winner)
-        print(Win)
-        print(self.client.team)
         if (Win):
             winner = self.client.team
-        print(winner)
-        msg = Message(TAG="BOARDUPDATE", board=self.board,text_message=winner)
+        self.boardClone.board[turn[0]][turn[1]].color=self.board.board[turn[0]][turn[1]].color
+        self.boardClone.board[turn[0]][turn[1]].selected = True
+        print(self.boardClone.board[turn[0]][turn[1]].color)
+        print(self.boardClone.board[turn[0]][turn[1]].selected)
+        msg = Message(TAG="BOARDUPDATE", board=self.boardClone,text_message=winner)
         self.broadcast(msg, False)
 
 
@@ -123,11 +123,16 @@ class ServerClientHandler(Thread):
                 if request.TAG == "JOIN":
                     # this function should be locked
                     #self.send_msg(Message(TAG='GOTOLOBBY'))
-
+                    self.client.team = random.choice([0,1])
                     info, self.room = self.server.join_make_room(self, request.text_message)
                     self.client_list = info[0]
                     self.board = info[1]
-
+                    self.boardClone = self.board.copy()
+                    print(self.boardClone.board)
+                    for i in range(len(self.boardClone.board)):
+                        for j in range(len(self.boardClone.board[i])):
+                            if(not self.boardClone.board[i][j].selected):
+                                self.boardClone.board[i][j].color=0
                     self.send_msg(Message(TAG='GOTOLOBBY'))
 
                     # log on server
@@ -159,16 +164,31 @@ class ServerClientHandler(Thread):
 
                 elif request.TAG == "CHOOSECODEMASTER":
                     # todo team is a number right? + check for teamates?
-                    if not self.client.is_codemaster and self.client.team is not None:
+                    team = True
+                    for client in self.client_list:
+                        print(client.client.team)
+                        print(self.client.team)
+                        if(client.client.team == self.client.team):
+                            print("hi")
+                            if(client.client.is_codemaster):
+                                team=False
+                                break
+
+                    if team and not self.client.is_codemaster and self.client.team is not None:
                         self.client.is_codemaster = True
 
-                    # todo send to client to let them know
+                    self.broadcast(Message("CODEMASTER"),False)
 
 
                 elif request.TAG == 'STARTGAME':
                     # distribute initial board
                     # todo randomize start team
                     self.send_msg(Message(TAG='STARTGAME', board=self.board, text_message=True))
+                    if(self.client.is_codemaster):
+                        for i in range(len(self.board.board)):
+                            for j in range(len(self.board[i])):
+                                self.boardClone[i][j].color=self.board.board[i][j]
+                                self.boardClone[i][j].selected =True
 
                 # todo perhaps consider renaming this
                 elif request.TAG == "GAMEREQUEST":
