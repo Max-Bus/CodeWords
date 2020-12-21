@@ -17,10 +17,16 @@ class StartMenu(GridLayout):
         self.client_socket = socket
         self.cols = 1
         self.rows = 3
+        self.padding = (150, 100, 150, 200)
+        self.spacing = 10
         self.add_widget(Label(text="Codewords"))
 
-        self.add_widget(Button(text="Join Private Lobby", on_press=self.open_private))
-        self.add_widget(Button(text="Join Public Lobby", on_press=self.open_public))
+        self.private_button = Button(text="Join Private Lobby", on_press=self.open_private)
+        self.add_widget(self.private_button)
+        self.public_button = Button(text="Join Public Lobby", on_press=self.open_public)
+        self.public_button.padding = (10, 10)
+        self.add_widget(self.public_button)
+
         self.name_input = None
         self.room_id_input = None
         self.popup = None
@@ -36,14 +42,17 @@ class StartMenu(GridLayout):
         self.popup.content = content
         content.cols = 2
         content.rows = 3
-
+        content.padding = 100
 
         self.name_input = TextInput(multiline=False)
-        content.add_widget(Label(text="Name:"))
+        self.name_label = Label(text="Name:")
+        content.add_widget(self.name_label)
         content.add_widget(self.name_input)
+        
 
         self.room_id_input = TextInput(multiline=False)
-        content.add_widget(Label(text="Room Code:"))
+        self.room_label = Label(text="Room Code:")
+        content.add_widget(self.room_label)
         content.add_widget(self.room_id_input)
 
         content.add_widget(Button(text="Back", on_press=self.popup.dismiss))
@@ -250,6 +259,7 @@ class GameChat(GridLayout):
 
 
 class FullGUI(GridLayout):
+
     def __init__(self, socket, **kwargs):
         super(FullGUI, self).__init__(**kwargs)
         self.socket = socket
