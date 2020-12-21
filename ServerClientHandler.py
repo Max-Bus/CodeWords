@@ -171,7 +171,7 @@ class ServerClientHandler(Thread):
                     # todo team is a number right? + check for teamates?
                     if(self.client.is_codemaster):
                         self.client.is_codemaster=False
-                        self.broadcast(Message(TAG="CODEMASTER", text_message=False), False)
+                        self.send_msg(Message(TAG="CODEMASTER", text_message=False))
                     else:
                         team = True
                         for client in self.client_list:
@@ -184,21 +184,28 @@ class ServerClientHandler(Thread):
 
                         if team and not self.client.is_codemaster and self.client.team is not None:
                             self.client.is_codemaster = True
-                            self.broadcast(Message(TAG="CODEMASTER", text_message=True), False)
+                            self.send_msg(Message(TAG="CODEMASTER", text_message=True))
                         else:
-                            self.broadcast(Message(TAG="CODEMASTER",text_message=False),False)
+                            self.send_msg(Message(TAG="CODEMASTER",text_message=False))
 
 
                 elif request.TAG == 'STARTGAME':
-                    # distribute initial board
-                    # todo randomize start team
-                    if (self.client.is_codemaster):
-                        for i in range(len(self.board.board)):
-                            for j in range(len(self.board.board[i])):
-                                self.boardClone.board[i][j].color = self.board.board[i][j].color
-                                self.boardClone.board[i][j].selected = True
-                    self.send_msg(Message(TAG='STARTGAME', board=self.boardClone, text_message=True))
-
+                    team_0_ready = False
+                    team_1_ready = False
+                    for client in self.client_list:
+                        if(client.client.is_codemaster):
+                            if(client.client.team==0):
+                                team_0_ready =True
+                            else:
+                                team_1_ready =True
+                    if(team_0_ready and team_1_ready):
+                        # distribute initial board
+                        if (self.client.is_codemaster):
+                            for i in range(len(self.board.board)):
+                                for j in range(len(self.board.board[i])):
+                                    self.boardClone.board[i][j].color = self.board.board[i][j].color
+                                    self.boardClone.board[i][j].selected = True
+                        self.broadcast(Message(TAG='STARTGAME', board=self.boardClone, text_message=True),False)
 
                 # todo perhaps consider renaming this
                 elif request.TAG == "GAMEREQUEST":
