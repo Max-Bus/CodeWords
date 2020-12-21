@@ -67,21 +67,17 @@ class ServerClientHandler(Thread):
 
     def maketurn(self,turn):
         # print(str(turn[0])+" "+str(turn[1]))
-
+        print(str(self.board.board[turn[0]][turn[1]].color))
         if(self.board.board[turn[0]][turn[1]].selected):
             return
 
         self.server.select(self.room,turn[0],turn[1])
         #self.board.board[][].selected = True
-        if(self.board.board[turn[0]][turn[1]].color != self.client.team):
-            #self.board.turn = (self.board.turn+1)%2
-            self.server.turn(self.room)
-            self.clued = False
+
 
         winner = None
         if (self.board.board[turn[0]][turn[1]].color == -2):
             winner = ((self.board.turn+1)%2)
-            print("here")
         Win = True
         for i in range(self.board.dim):
             for j in range(self.board.dim):
@@ -94,6 +90,10 @@ class ServerClientHandler(Thread):
         self.boardClone.board[turn[0]][turn[1]].selected = True
         msg = Message(TAG="BOARDUPDATE", board=self.boardClone,text_message=winner)
         self.broadcast(msg, False)
+
+        if (self.board.board[turn[0]][turn[1]].color != self.client.team):
+            self.server.turn(self.room)
+            self.clued = False
 
 
     def get_msg(self):

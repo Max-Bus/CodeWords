@@ -151,7 +151,23 @@ class GameGUI(GridLayout):
         self.game_chat.height = self.game_chat.parent.height * 8
 
         self.left_side.size = (self.left_side.parent.width, self.left_side.parent.height)
+    def win_lose(self,win):
+        self.popup = Popup(title="Private Lobby")
+        self.popup.size = (40, 40)
 
+        content = GridLayout()
+        self.popup.content = content
+        content.cols = 1
+        content.rows = 2
+        result = "LOSE"
+        if(win):
+            result="WIN"
+
+        content.add_widget(Label(text="YOU "+result))
+
+        content.add_widget(Button(text="Back", on_press=self.popup.dismiss))
+
+        self.popup.open()
 
 class WordBoard(GridLayout):
     # def __init__(self, board, is_turn, **kwargs):
@@ -288,6 +304,8 @@ class FullGUI(GridLayout):
     def go_to_lobby(self):
         self.start_menu.scrub()
         self.remove_widget(self.start_menu)
+        if (self.gamegui is not None) :
+            self.remove_widget(self.gamegui)
         self.lobby = Lobby(self.socket)
         self.add_widget(self.lobby)
         self.do_layout()

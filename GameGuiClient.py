@@ -87,9 +87,12 @@ class GameGUIClient(App):
                 elif incoming.TAG == 'BOARDUPDATE':
                     print('updating board')
                     print(str(incoming.text_message))
-                    #todo
-                    self.gui_client.root.gamegui.word_board.update_board(incoming.board.board, False)
-                    pass
+                    if(incoming.text_message is None):
+                        #todo
+                        self.gui_client.root.gamegui.word_board.update_board(incoming.board.board, False)
+                    else:
+                        self.gui_client.root.gamegui.win_lose(incoming.text_message==self.team)
+                        self.gui_client.root.go_to_lobby()
                 elif incoming.TAG == "CLUE":
                     word = incoming.text_message.split(" ")
                     word.append("")
