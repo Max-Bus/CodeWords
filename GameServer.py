@@ -76,6 +76,15 @@ class Server:
             return True
         self.lock.release()
         return False
+    def turn(self,room):
+        self.lock.acquire()
+        ROOMS[room][1].turn = (ROOMS[room][1].turn+1)%2
+        self.lock.release()
+
+    def select(self,room,x,y):
+        self.lock.acquire()
+        ROOMS[room][1].board[x][y].selected = True
+        self.lock.release()
 
 
 server = Server()
