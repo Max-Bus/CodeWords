@@ -9,6 +9,7 @@ from kivy.uix.textinput import TextInput
 from GUIRunner import *
 import socket
 import pickle
+import time
 from Message import Message
 
 
@@ -44,6 +45,7 @@ class GameGUIClient(App):
             incoming = 'temp'
 
             while incoming is not None:
+                time.sleep(0.01)
                 # get size (represented as int 8 bytes) of the incoming message
                 size = self.gui_client.socket.recv(8)
                 # turn the byte stream into an integer
@@ -64,7 +66,11 @@ class GameGUIClient(App):
 
                 elif incoming.TAG == 'TEAMSELECTED':
                     self.team = incoming.text_message
-
+                    print(str(self.team))
+                    print(str(type(self.team)))
+                    self.gui_client.root.lobby.change_team(self.team)
+                elif incoming.TAG == "CODEMASTER":
+                    self.gui_client.root.lobby.codemaster(incoming.text_message)
                 elif incoming.TAG == 'STARTGAME':
                     # open gameboard
                     print(len(incoming.board.board[0]))
@@ -84,13 +90,22 @@ class GameGUIClient(App):
                     #todo
                     self.gui_client.root.gamegui.word_board.update_board(incoming.board.board, False)
                     pass
-
+                elif incoming.TAG == "CLUE":
+                    word = incoming.text_message.split(" ")
+                    word.append("")
+                    self.gui_client.root.gamegui.hint_area.receive_hint(word[0],word[1])
 
                 elif incoming.TAG == 'GOTOLOBBY':
                     print('i am here now')
                     self.gui_client.root.go_to_lobby()
+                    self.team= incoming.text_message
+                    time.sleep(0.01)
+                    self.gui_client.root.lobby.change_team(self.team)
+
+
 
                 elif incoming.TAG == 'CHAT':
+
                     print(incoming.text_message)
 
                 # elif incoming.TAG == 'GOTOGAME':
@@ -101,6 +116,7 @@ class GameGUIClient(App):
                     print(incoming.text_message)
 
         def send(self, msg):
+            time.sleep(0.01)
             # serialize message
             serialized_msg = pickle.dumps(msg)
             # get size (represented as int 8 bytes) of message in bytes

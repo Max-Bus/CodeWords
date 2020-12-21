@@ -6,10 +6,12 @@ from kivy.uix.button import Button
 from kivy.uix.popup import Popup
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.textinput import TextInput
+from kivy.graphics import Color, Rectangle
 import pickle
 import sys
 from Message import *
 import re
+import time
 
 class StartMenu(GridLayout):
     def __init__(self, socket, **kwargs):
@@ -81,8 +83,8 @@ class Lobby(GridLayout):
         self.client_socket = socket
         self.cols = 1
         self.rows = 5
-
-        self.add_widget(Label(text="Lobby"))
+        self.label = Label(text="Lobby")
+        self.add_widget(self.label)
         self.role_table = GridLayout()
         self.role_table.cols = 2
         self.role_table.rows = 4
@@ -105,6 +107,25 @@ class Lobby(GridLayout):
                                    send_msg(self.client_socket, Message(TAG='STARTGAME')))
 
         self.add_widget(self.start_button)
+    def change_team(self,color_int):
+        color = None
+        if color_int == 1:
+            color = (1, 0, 0, 1)
+        elif color_int == 0:
+            color = (0, 0, 1, 1)
+        elif color_int == -1:
+            color = (0.5, 0.5, 0.5, 0.5)
+        else:
+            color = (1, 1, 1, 1)
+        with self.label.canvas:
+            print(color)
+            Color(color[0],color[1],color[2],color[3])
+            Rectangle(pos=self.label.pos, size=self.label.size)
+    def codemaster(self,bool):
+        if(bool):
+            self.codemaster_button.text="Become player"
+        else:
+            self.codemaster_button.text = "Become Codemaster"
 
 class GameGUI(GridLayout):
     def __init__(self, socket, board_dims, is_turn, **kwargs):
@@ -213,7 +234,7 @@ class HintArea(GridLayout):
         self.cols = 1
         self.rows = 2
 
-        self.current_hint = Label(text="country, 2")
+        self.current_hint = Label(text="")
         self.add_widget(self.current_hint)
 
     def receive_hint(self, word, count):
@@ -280,6 +301,7 @@ class FullGUI(GridLayout):
 
 
 def send_msg(socket, msg):
+    time.sleep(0.01)
     # serialize message
     serialized_msg = pickle.dumps(msg)
     # get size (represented as int 8 bytes) of message in bytes

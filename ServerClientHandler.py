@@ -5,7 +5,7 @@ import sys
 from Message import *
 import re
 import random
-import copy
+import time
 
 
 class ServerClientHandler(Thread):
@@ -48,6 +48,7 @@ class ServerClientHandler(Thread):
                 recipient.send_msg(message)
 
     def send_msg(self,msg):
+        time.sleep(0.01)
         # serialize message
         serialized_msg = pickle.dumps(msg)
         # get size (represented as int 8 bytes) of message in bytes
@@ -66,9 +67,11 @@ class ServerClientHandler(Thread):
         if(self.board.board[turn[0]][turn[1]].selected):
             return
 
-        self.board.board[turn[0]][turn[1]].selected = True
+        self.server.select(self.room,turn[0],turn[1])
+        #self.board.board[][].selected = True
         if(self.board.board[turn[0]][turn[1]].color != self.client.team):
-            self.board.turn = (1,0)[self.board.turn==1]
+            #self.board.turn = (self.board.turn+1)%2
+            self.server.turn(self.room)
             self.clued = False
 
         winner = None
@@ -85,13 +88,12 @@ class ServerClientHandler(Thread):
             winner = self.client.team
         self.boardClone.board[turn[0]][turn[1]].color=self.board.board[turn[0]][turn[1]].color
         self.boardClone.board[turn[0]][turn[1]].selected = True
-        print(self.boardClone.board[turn[0]][turn[1]].color)
-        print(self.boardClone.board[turn[0]][turn[1]].selected)
         msg = Message(TAG="BOARDUPDATE", board=self.boardClone,text_message=winner)
         self.broadcast(msg, False)
 
 
     def get_msg(self):
+        time.sleep(0.01)
         # get size of the incoming message
         size = self.client.socket.recv(8)
 
@@ -120,6 +122,9 @@ class ServerClientHandler(Thread):
 
                 request = self.get_msg()
                 print('msg received: ' + request.TAG)
+                if (self.client.is_codemaster):
+                    if(request.TAG=="CHAT" and not self.clued and self.board.turn == self.client.team):
+                        request.TAG="CLUE"
                 if request.TAG == "JOIN":
                     # this function should be locked
                     #self.send_msg(Message(TAG='GOTOLOBBY'))
@@ -133,7 +138,7 @@ class ServerClientHandler(Thread):
                         for j in range(len(self.boardClone.board[i])):
                             if(not self.boardClone.board[i][j].selected):
                                 self.boardClone.board[i][j].color=0
-                    self.send_msg(Message(TAG='GOTOLOBBY'))
+                    self.send_msg(Message(TAG='GOTOLOBBY',text_message=self.client.team))
 
                     # log on server
                     if request.text_message is None:
@@ -164,20 +169,24 @@ class ServerClientHandler(Thread):
 
                 elif request.TAG == "CHOOSECODEMASTER":
                     # todo team is a number right? + check for teamates?
-                    team = True
-                    for client in self.client_list:
-                        print(client.client.team)
-                        print(self.client.team)
-                        if(client.client.team == self.client.team):
-                            print("hi")
-                            if(client.client.is_codemaster):
-                                team=False
-                                break
+                    if(self.client.is_codemaster):
+                        self.client.is_codemaster=False
+                        self.broadcast(Message(TAG="CODEMASTER", text_message=False), False)
+                    else:
+                        team = True
+                        for client in self.client_list:
+                            print(client.client.team)
+                            print(self.client.team)
+                            if(client.client.team == self.client.team):
+                                if(client.client.is_codemaster):
+                                    team=False
+                                    break
 
-                    if team and not self.client.is_codemaster and self.client.team is not None:
-                        self.client.is_codemaster = True
-
-                    self.broadcast(Message("CODEMASTER"),False)
+                        if team and not self.client.is_codemaster and self.client.team is not None:
+                            self.client.is_codemaster = True
+                            self.broadcast(Message(TAG="CODEMASTER", text_message=True), False)
+                        else:
+                            self.broadcast(Message(TAG="CODEMASTER",text_message=False),False)
 
 
                 elif request.TAG == 'STARTGAME':
