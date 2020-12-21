@@ -105,7 +105,7 @@ class GameGUIClient(App):
 
 
                 elif incoming.TAG == 'CHAT':
-
+                    self.gui_client.root.gamegui.game_chat.display(incoming.text_message)
                     print(incoming.text_message)
 
                 # elif incoming.TAG == 'GOTOGAME':

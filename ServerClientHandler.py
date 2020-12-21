@@ -26,6 +26,9 @@ class ServerClientHandler(Thread):
 
     def broadcast(self,msg,team):
         print(msg.TAG)
+        if(msg.TAG=="CHAT"):
+            print("hi")
+            msg.text_message = self.client.name+": "+msg.text_message
         for recipient in self.client_list:
             if(not team or (team and self.client.team == recipient.client.team)):
                 recipient.send_msg(msg)
@@ -43,6 +46,7 @@ class ServerClientHandler(Thread):
         return recipients
 
     def privatebroadcast(self,recipients,message):
+        message.text_message = self.client.name+"(private): "+message.text_message
         for recipient in self.client_list:
             if(recipient.client.name in recipients):
                 recipient.send_msg(message)
@@ -192,12 +196,14 @@ class ServerClientHandler(Thread):
                 elif request.TAG == 'STARTGAME':
                     team_0_ready = False
                     team_1_ready = False
+                    print(self.client_list)
                     for client in self.client_list:
                         if(client.client.is_codemaster):
                             if(client.client.team==0):
                                 team_0_ready =True
                             else:
                                 team_1_ready =True
+
                     if(team_0_ready and team_1_ready):
                         # distribute initial board
                         if (self.client.is_codemaster):
@@ -232,6 +238,7 @@ class ServerClientHandler(Thread):
                     requested_name = request.name
                     if len(requested_name) > 3 and re.search(r'^[a-zA-Z0-9]*$', requested_name):
                         print(request.name)
+                        self.client.name=requested_name
                         # public room
                         if request.roomid is None:
                             self.send_msg(Message(TAG='ALLOWJOINGAME', name=requested_name))

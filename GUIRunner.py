@@ -232,7 +232,7 @@ class HintArea(GridLayout):
     def __init__(self, **kwargs):
         super(HintArea, self).__init__(**kwargs)
         self.cols = 1
-        self.rows = 2
+        self.rows = 1
 
         self.current_hint = Label(text="")
         self.add_widget(self.current_hint)
@@ -248,7 +248,7 @@ class GameChat(GridLayout):
 
         self.socket = socket
 
-        self.chat_log = TextInput(multiline=True)
+        self.chat_log = TextInput(multiline=True,readonly=True)
         self.add_widget(self.chat_log)
         self.message_bar = TextInput(multiline=True)
         self.message_area = GridLayout(rows=1,cols=2)
@@ -256,6 +256,9 @@ class GameChat(GridLayout):
         self.message_button = Button(text="Send", on_press=self.chat)
         self.message_area.add_widget(self.message_button)
         self.add_widget(self.message_area)
+    def display(self,msg):
+        print("here")
+        self.chat_log.text += (msg+"\n")
 
     # rough method to be attached to button or command for sending a message
     def chat(self, instance):
@@ -268,6 +271,7 @@ class GameChat(GridLayout):
             send_msg(self.socket, Message(TAG='PCHAT', text_message=chat_msg))
         else:
             send_msg(self.socket, Message(TAG='CHAT', text_message=chat_msg))
+        self.message_bar.text=""
 
 
 class FullGUI(GridLayout):
@@ -312,3 +316,4 @@ def send_msg(socket, msg):
     socket.sendall(data_size)
     # send data
     socket.sendall(serialized_msg)
+
