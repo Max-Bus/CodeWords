@@ -95,6 +95,9 @@ class Lobby(GridLayout):
         self.label = Label(text="Lobby")
         self.add_widget(self.label)
 
+        self.red_names = []
+        self.blue_names = []
+
         self.participant_area = GridLayout(rows=1, cols=2)
         self.red_participants = Label(text="red\n")
         self.participant_area.add_widget(self.red_participants)
@@ -120,17 +123,42 @@ class Lobby(GridLayout):
 
         self.add_widget(self.start_button)
 
-    def add_participant(self, name_str):
-        # [team num]:name
-        team = int(name_str.split(':')[0])
-
-        if team == 1:
-            self.red_participants.text += name_str.split(':')[1] + '\n'
-        elif team == 0:
-            self.blue_participants.text += name_str.split(':')[1] + '\n'
+    # todo remove participant
 
 
-    def change_team(self,color_int):
+    def readd_all_participants(self, name_str):
+        self.red_names = []
+        self.blue_names = []
+
+        for name in name_str.split(','):
+            team = int(name.split(':')[0])
+
+            if team == 1:
+                self.red_names.append(name.split(':')[1])
+            elif team == 0:
+                self.blue_names.append(name.split(':')[1])
+
+        self.update_participants()
+
+    # redraws the names (in case of team switch etc.)
+    def update_participants(self):
+        redtxt = 'red\n'
+        bluetxt = 'blue\n'
+
+        print(self.red_names)
+        for person in self.red_names:
+            redtxt += person + '\n'
+
+        for person in self.blue_names:
+            bluetxt += person + '\n'
+
+        self.red_participants.text = redtxt
+        self.blue_participants.text = bluetxt
+
+    def change_team(self, color_int):
+        # color int is equivalent to team number
+
+        # adjust color
         color = None
         if color_int == 1:
             color = (1, 0, 0, 1)
@@ -144,6 +172,21 @@ class Lobby(GridLayout):
             print(color)
             Color(color[0],color[1],color[2],color[3])
             Rectangle(pos=self.label.pos, size=self.label.size)
+
+    # when people change teams, swap their names
+    def adjust_teams(self, name, team_num):
+        if name != 'not_applicable':
+            if team_num == 0:
+                # switching to blue
+                self.red_names.remove(name)
+                self.blue_names.append(name)
+            elif team_num == 1:
+                # switching to red
+                self.blue_names.remove(name)
+                self.red_names.append(name)
+
+            self.update_participants()
+
 
     def codemaster(self,bool):
         if(bool):
@@ -279,7 +322,6 @@ class GameChat(GridLayout):
         self.chat_log.text += (msg+"\n")
 
     def update_participants(self, names_str):
-        print('in method')
         # [team num]:name1,[team num]:name2,[team num]:name3....
 
         # add names to display label

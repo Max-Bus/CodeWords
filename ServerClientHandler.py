@@ -151,8 +151,22 @@ class ServerClientHandler(Thread):
                         print(request.name + ' had joined private room ' + request.text_message + '.')
 
                     # tell gui to add player's name to the screen
-                    name_str = 'lobby;' + str(self.client.team) + ':' + self.client.username
-                    self.broadcast(Message(TAG='UPDATEPARTICIPANTS', text_message=name_str), False)
+                    participants_string = 'lobby;'
+                    for cl_listener in self.client_list:
+                        name = cl_listener.client.username
+                        # if name == self.client.username:
+                        #     name += '(you)'
+
+                        team_num = cl_listener.client.team
+                        participants_string += str(team_num) + ':' + name + ','
+
+                    # remove comma at the end
+                    participants_string = participants_string[:-1]
+
+                    self.broadcast(Message(TAG='UPDATEPARTICIPANTS', text_message=participants_string), False)
+
+                    # name_str = 'lobby;' + str(self.client.team) + ':' + self.client.username
+                    # self.broadcast(Message(TAG='UPDATEPARTICIPANTS', text_message=name_str), False)
 
                     continue
 
@@ -173,7 +187,13 @@ class ServerClientHandler(Thread):
                     #self.client.team = request.text_message
                     self.client.team = (1 + self.client.team) % 2
                     print("new team:"+str(self.client.team))
+
+                    # [team num]:name
                     self.send_msg(Message(TAG='TEAMSELECTED', text_message=self.client.team))
+
+                    # tell everyone to update their lobby participants
+                    txtmsg = str(self.client.team) + ':' + self.client.username
+                    self.broadcast(Message(TAG='LOBBYTEAMUPDATE', text_message=txtmsg), False)
 
                 elif request.TAG == "CHOOSECODEMASTER":
                     # todo team is a number right? + check for teamates?
