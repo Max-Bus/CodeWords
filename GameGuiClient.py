@@ -118,8 +118,8 @@ class GameGUIClient(App):
 
                     if which_screen == 'game':
                         self.gui_client.root.gamegui.game_chat.update_participants(names_str)
-                    # todo
-
+                    elif which_screen == 'lobby':
+                        self.gui_client.root.lobby.add_participant(names_str)
 
 
                 elif incoming.TAG == 'CHAT':

@@ -150,6 +150,10 @@ class ServerClientHandler(Thread):
                     else:
                         print(request.name + ' had joined private room ' + request.text_message + '.')
 
+                    # tell gui to add player's name to the screen
+                    name_str = 'lobby;' + str(self.client.team) + ':' + self.client.username
+                    self.broadcast(Message(TAG='UPDATEPARTICIPANTS', text_message=name_str), False)
+
                     continue
 
                 elif request.TAG=="CHAT":
@@ -213,13 +217,11 @@ class ServerClientHandler(Thread):
                                     self.boardClone.board[i][j].selected = True
                         self.broadcast(Message(TAG='STARTGAME', board=self.boardClone, text_message=True),False)
 
-                    # todo sending names of participants
-                    print('server: updating participants')
+
                     # send list of participants
                     participants_string = 'game;'
                     for cl_listener in self.client_list:
                         name = cl_listener.client.username
-                        print(name)
                         if name == self.client.username:
                             name += '(you)'
 
@@ -232,7 +234,6 @@ class ServerClientHandler(Thread):
                     self.broadcast(Message(TAG='UPDATEPARTICIPANTS', text_message=participants_string), False)
 
 
-                # todo perhaps consider renaming this
                 elif request.TAG == "GAMEREQUEST":
                     print(request.move)
                     if(self.client.team is None):
