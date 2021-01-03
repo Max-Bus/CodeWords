@@ -90,12 +90,6 @@ class GameGUIClient(App):
                                                     (not incoming.text_message and self.gui_client.team == '0') or (incoming.text_message and self.gui_client.team == '1'))
 
 
-                    # # todo make nicer + fix logic
-                    # if (not incoming.text_message and self.gui_client.team == '0') or (incoming.text_message and self.gui_client.team == '1'):
-                    #     self.gui_client.root.gamegui.word_board.set_initial_board(incoming.board, True)
-                    # else:
-                    #     self.gui_client.root.gamegui.word_board.set_initial_board(incoming.board, False)
-
                 elif incoming.TAG == 'BOARDUPDATE':
                     print('updating board')
                     print(str(incoming.text_message))
@@ -127,12 +121,10 @@ class GameGUIClient(App):
                     names_str = incoming.text_message.split(';')[1]
 
                     # modify string to add 'you' and 'cm' (codemaster)
-                    str_toadd = ' (you)'
-                    if self.gui_client.is_codemaster:
-                        str_toadd += ' (cm)'
+                    str_to_add = ' (you)'
 
                     i = names_str.index(self.gui_client.player_name) + len(self.gui_client.player_name)
-                    names_str = names_str[:i] + str_toadd + names_str[i:]
+                    names_str = names_str[:i] + str_to_add + names_str[i:]
 
                     if which_screen == 'game':
                         self.gui_client.root.gamegui.game_chat.update_participants(names_str)

@@ -154,8 +154,6 @@ class ServerClientHandler(Thread):
                     participants_string = 'lobby;'
                     for cl_listener in self.client_list:
                         name = cl_listener.client.username
-                        # if name == self.client.username:
-                        #     name += '(you)'
 
                         team_num = cl_listener.client.team
                         participants_string += str(team_num) + ':' + name + ','
@@ -216,6 +214,22 @@ class ServerClientHandler(Thread):
                         else:
                             self.send_msg(Message(TAG="CODEMASTER",text_message=False))
 
+                    # notify everyone of the codemaster so they can update the gui
+                    participants_string = 'lobby;'
+                    for cl_listener in self.client_list:
+                        name = cl_listener.client.username
+                        if cl_listener.client.is_codemaster:
+                            name += ' (cm)'
+
+                        team_num = cl_listener.client.team
+                        participants_string += str(team_num) + ':' + name + ','
+
+                    # remove comma at the end
+                    participants_string = participants_string[:-1]
+
+                    self.broadcast(Message(TAG='UPDATEPARTICIPANTS', text_message=participants_string), False)
+
+
 
                 elif request.TAG == 'STARTGAME':
                     team_0_ready = False
@@ -237,13 +251,12 @@ class ServerClientHandler(Thread):
                                     self.boardClone.board[i][j].selected = True
                         self.broadcast(Message(TAG='STARTGAME', board=self.boardClone, text_message=True),False)
 
-
                     # send list of participants
                     participants_string = 'game;'
                     for cl_listener in self.client_list:
                         name = cl_listener.client.username
-                        # if name == self.client.username:
-                        #     name += '(you)'
+                        if cl_listener.client.is_codemaster:
+                            name += ' (cm)'
 
                         team_num = cl_listener.client.team
                         participants_string += str(team_num) + ':' + name + ','
