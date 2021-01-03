@@ -175,17 +175,23 @@ class Lobby(GridLayout):
 
     # when people change teams, swap their names
     def adjust_teams(self, name, team_num):
-        if name != 'not_applicable':
-            if team_num == 0:
-                # switching to blue
-                self.red_names.remove(name)
-                self.blue_names.append(name)
-            elif team_num == 1:
-                # switching to red
-                self.blue_names.remove(name)
-                self.red_names.append(name)
+        possible_names = [name, name + ' (you)', name + ' (you) (cm)']
+        for n in possible_names:
+            try:
+                if team_num == 0:
+                    # switching to blue
+                    self.red_names.remove(n)
+                    self.blue_names.append(n)
+                elif team_num == 1:
+                    # switching to red
+                    self.blue_names.remove(n)
+                    self.red_names.append(n)
 
-            self.update_participants()
+                break
+            except:
+                continue
+
+        self.update_participants()
 
 
     def codemaster(self,bool):

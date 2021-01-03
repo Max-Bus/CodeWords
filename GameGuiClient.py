@@ -24,6 +24,7 @@ class GameGUIClient(App):
         self.socket.connect((ip, port))
         self.team = '1'
         self.player_name = ''
+        self.is_codemaster = False
 
 
     def build(self):
@@ -73,6 +74,7 @@ class GameGUIClient(App):
 
                 elif incoming.TAG == "CODEMASTER":
                     self.gui_client.root.lobby.codemaster(incoming.text_message)
+                    self.gui_client.is_codemaster = incoming.text_message
 
                 elif incoming.TAG == 'LOBBYTEAMUPDATE':
                     # [team num]:name
@@ -123,6 +125,14 @@ class GameGUIClient(App):
 
                     which_screen = incoming.text_message.split(';')[0]
                     names_str = incoming.text_message.split(';')[1]
+
+                    # modify string to add 'you' and 'cm' (codemaster)
+                    str_toadd = ' (you)'
+                    if self.gui_client.is_codemaster:
+                        str_toadd += ' (cm)'
+
+                    i = names_str.index(self.gui_client.player_name) + len(self.gui_client.player_name)
+                    names_str = names_str[:i] + str_toadd + names_str[i:]
 
                     if which_screen == 'game':
                         self.gui_client.root.gamegui.game_chat.update_participants(names_str)
