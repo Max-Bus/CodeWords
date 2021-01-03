@@ -213,6 +213,25 @@ class ServerClientHandler(Thread):
                                     self.boardClone.board[i][j].selected = True
                         self.broadcast(Message(TAG='STARTGAME', board=self.boardClone, text_message=True),False)
 
+                    # todo sending names of participants
+                    print('server: updating participants')
+                    # send list of participants
+                    participants_string = 'game;'
+                    for cl_listener in self.client_list:
+                        name = cl_listener.client.username
+                        print(name)
+                        if name == self.client.username:
+                            name += '(you)'
+
+                        team_num = cl_listener.client.team
+                        participants_string += str(team_num) + ':' + name + ','
+
+                    # remove comma at the end
+                    participants_string = participants_string[:-1]
+
+                    self.broadcast(Message(TAG='UPDATEPARTICIPANTS', text_message=participants_string), False)
+
+
                 # todo perhaps consider renaming this
                 elif request.TAG == "GAMEREQUEST":
                     print(request.move)
@@ -247,6 +266,8 @@ class ServerClientHandler(Thread):
                         else:
                             room_id = request.roomid
                             self.send_msg(Message(TAG='ALLOWJOINGAME', name=requested_name, roomid=room_id))
+
+                        self.client.username = requested_name
 
                     # invalid name
                     else:

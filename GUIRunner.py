@@ -274,9 +274,9 @@ class GameChat(GridLayout):
 
         # for vignesh
         self.participant_area = GridLayout(rows=1,cols=2)
-        self.red_participants = Label(text="red")
+        self.red_participants = Label(text="red\n")
         self.participant_area.add_widget(self.red_participants)
-        self.blue_participants = Label(text="blue")
+        self.blue_participants = Label(text="blue\n")
         self.participant_area.add_widget(self.blue_participants)
         self.add_widget(self.participant_area)
 
@@ -289,9 +289,23 @@ class GameChat(GridLayout):
         self.message_button = Button(text="Send", on_press=self.chat)
         self.message_area.add_widget(self.message_button)
         self.add_widget(self.message_area)
+
     def display(self,msg):
         print("here")
         self.chat_log.text += (msg+"\n")
+
+    def update_participants(self, names_str):
+        print('in method')
+        # [team num]:name1,[team num]:name2,[team num]:name3....
+
+        # add names to display label
+        for name in names_str.split(','):
+            team = int(name.split(':')[0])
+
+            if team == 1:
+                self.red_participants.text += name.split(':')[1] + '\n'
+            elif team == 0:
+                self.blue_participants.text += name.split(':')[1] + '\n'
 
     # rough method to be attached to button or command for sending a message
     def chat(self, instance):

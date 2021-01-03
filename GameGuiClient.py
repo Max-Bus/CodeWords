@@ -39,6 +39,7 @@ class GameGUIClient(App):
             self.gui_client = client
 
             self.is_named = False
+            self.in_game = False
 
         def __call__(self):
 
@@ -74,6 +75,7 @@ class GameGUIClient(App):
                 elif incoming.TAG == 'STARTGAME':
                     # open gameboard
                     print(len(incoming.board.board[0]))
+                    self.in_game = True
                     self.gui_client.root.go_to_game(incoming.board.board,
                                                     (not incoming.text_message and self.gui_client.team == '0') or (incoming.text_message and self.gui_client.team == '1'))
 
@@ -104,6 +106,19 @@ class GameGUIClient(App):
                     self.team= incoming.text_message
                     time.sleep(0.01)
                     self.gui_client.root.lobby.change_team(self.team)
+
+                elif incoming.TAG == 'UPDATEPARTICIPANTS':
+                    print('updating participants')
+                    # options
+                    # game;[team num]:name1,[team num]:name2,[team num]:name3....
+                    # lobby;[team num]:name1,[team num]:name2,[team num]:name3....
+
+                    which_screen = incoming.text_message.split(';')[0]
+                    names_str = incoming.text_message.split(';')[1]
+
+                    if which_screen == 'game':
+                        self.gui_client.root.gamegui.game_chat.update_participants(names_str)
+                    # todo
 
 
 
