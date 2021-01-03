@@ -269,12 +269,20 @@ class GameChat(GridLayout):
     def __init__(self, socket, **kwargs):
         super(GameChat, self).__init__(**kwargs)
         self.cols = 1
-        self.rows = 2
-
+        self.rows = 3
         self.socket = socket
+
+        # for vignesh
+        self.participant_area = GridLayout(rows=1,cols=2)
+        self.red_participants = Label(text="red")
+        self.participant_area.add_widget(self.red_participants)
+        self.blue_participants = Label(text="blue")
+        self.participant_area.add_widget(self.blue_participants)
+        self.add_widget(self.participant_area)
 
         self.chat_log = TextInput(multiline=True,readonly=True)
         self.add_widget(self.chat_log)
+
         self.message_bar = TextInput(multiline=True)
         self.message_area = GridLayout(rows=1,cols=2)
         self.message_area.add_widget(self.message_bar)
