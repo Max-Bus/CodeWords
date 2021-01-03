@@ -94,10 +94,13 @@ class Lobby(GridLayout):
         self.rows = 5
         self.label = Label(text="Lobby")
         self.add_widget(self.label)
-        self.role_table = GridLayout()
-        self.role_table.cols = 2
-        self.role_table.rows = 4
-        self.add_widget(self.role_table)
+
+        self.participant_area = GridLayout(rows=1, cols=2)
+        self.red_participants = Label(text="red\n")
+        self.participant_area.add_widget(self.red_participants)
+        self.blue_participants = Label(text="blue\n")
+        self.participant_area.add_widget(self.blue_participants)
+        self.add_widget(self.participant_area)
 
         self.switch_button = Button(text="Switch Team",
                                     on_press = lambda event:
