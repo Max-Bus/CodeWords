@@ -242,8 +242,8 @@ class ServerClientHandler(Thread):
                     participants_string = 'game;'
                     for cl_listener in self.client_list:
                         name = cl_listener.client.username
-                        if name == self.client.username:
-                            name += '(you)'
+                        # if name == self.client.username:
+                        #     name += '(you)'
 
                         team_num = cl_listener.client.team
                         participants_string += str(team_num) + ':' + name + ','
