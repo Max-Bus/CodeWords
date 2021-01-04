@@ -157,5 +157,5 @@ class GameGUIClient(App):
             self.gui_client.socket.sendall(serialized_msg)
 
 if __name__ == "__main__":
-    gui = GameGUIClient('localhost', 54321)
+    gui = GameGUIClient('ec2-13-58-169-82.us-east-2.compute.amazonaws.com', 59001)
     gui.run()
