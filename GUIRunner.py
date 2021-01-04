@@ -95,6 +95,9 @@ class Lobby(GridLayout):
         self.label = Label(text="Lobby")
         self.add_widget(self.label)
 
+        self.red_names = []
+        self.blue_names = []
+
         self.participant_area = GridLayout(rows=1, cols=2)
         self.red_participants = Label(text="red\n")
         self.participant_area.add_widget(self.red_participants)
@@ -119,7 +122,43 @@ class Lobby(GridLayout):
                                    send_msg(self.client_socket, Message(TAG='STARTGAME')))
 
         self.add_widget(self.start_button)
-    def change_team(self,color_int):
+
+    # todo remove participant
+
+
+    def readd_all_participants(self, name_str):
+        self.red_names = []
+        self.blue_names = []
+
+        for name in name_str.split(','):
+            team = int(name.split(':')[0])
+
+            if team == 1:
+                self.red_names.append(name.split(':')[1])
+            elif team == 0:
+                self.blue_names.append(name.split(':')[1])
+
+        self.update_participants()
+
+    # redraws the names (in case of team switch etc.)
+    def update_participants(self):
+        redtxt = 'red\n'
+        bluetxt = 'blue\n'
+
+        print(self.red_names)
+        for person in self.red_names:
+            redtxt += person + '\n'
+
+        for person in self.blue_names:
+            bluetxt += person + '\n'
+
+        self.red_participants.text = redtxt
+        self.blue_participants.text = bluetxt
+
+    def change_team(self, color_int):
+        # color int is equivalent to team number
+
+        # adjust color
         color = None
         if color_int == 1:
             color = (1, 0, 0, 1)
@@ -133,6 +172,28 @@ class Lobby(GridLayout):
             print(color)
             Color(color[0],color[1],color[2],color[3])
             Rectangle(pos=self.label.pos, size=self.label.size)
+
+    # when people change teams, swap their names
+    def adjust_teams(self, name, team_num):
+        possible_names = [name, name + ' (you)', name + ' (you) (cm)']
+        for n in possible_names:
+            try:
+                if team_num == 0:
+                    # switching to blue
+                    self.red_names.remove(n)
+                    self.blue_names.append(n)
+                elif team_num == 1:
+                    # switching to red
+                    self.blue_names.remove(n)
+                    self.red_names.append(n)
+
+                break
+            except:
+                continue
+
+        self.update_participants()
+
+
     def codemaster(self,bool):
         if(bool):
             self.codemaster_button.text="Become player"
@@ -163,6 +224,7 @@ class GameGUI(GridLayout):
         self.game_chat.height = self.game_chat.parent.height * 8
 
         self.left_side.size = (self.left_side.parent.width, self.left_side.parent.height)
+
     def win_lose(self,win):
         self.popup = Popup(title="Private Lobby")
         self.popup.size = (40, 40)
@@ -182,37 +244,6 @@ class GameGUI(GridLayout):
         self.popup.open()
 
 class WordBoard(GridLayout):
-    # def __init__(self, board, is_turn, **kwargs):
-    #     super(WordBoard, self).__init__(**kwargs)
-    #     self.is_turn = is_turn
-    #     self.cols = len(board.board[0])
-    #     self.rows = len(board.board)
-    #
-    #     self.btn_board = []
-    #     for i in range(self.cols):
-    #         row = []
-    #         for j in range(self.rows):
-    #             b = Button(text="Word")
-    #             row.append(b)
-    #             self.add_widget(b)
-    #         self.btn_board.append(row)
-
-    # def __init__(self, socket, **kwargs):
-    #     super(WordBoard, self).__init__(**kwargs)
-    #     self.socket = socket
-    #     self.is_turn = False
-    #     self.cols = 5
-    #     self.rows = 5
-    #
-    #     self.board = []
-    #     for i in range(5):
-    #         col = []
-    #         for j in range(5):
-    #             b = Button(text="Word")
-    #             col.append(b)
-    #             self.add_widget(b)
-    #         self.board.append(col)
-    #     # print(self.board)
 
     def __init__(self, socket, board, is_turn, **kwargs):
         super(WordBoard, self).__init__(**kwargs)
@@ -275,7 +306,6 @@ class GameChat(GridLayout):
         self.rows = 3
         self.socket = socket
 
-        # for vignesh
         self.participant_area = GridLayout(rows=1,cols=2)
         self.red_participants = Label(text="red\n")
         self.participant_area.add_widget(self.red_participants)
@@ -298,7 +328,6 @@ class GameChat(GridLayout):
         self.chat_log.text += (msg+"\n")
 
     def update_participants(self, names_str):
-        print('in method')
         # [team num]:name1,[team num]:name2,[team num]:name3....
 
         # add names to display label

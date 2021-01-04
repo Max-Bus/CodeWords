@@ -23,6 +23,8 @@ class GameGUIClient(App):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect((ip, port))
         self.team = '1'
+        self.player_name = ''
+        self.is_codemaster = False
 
 
     def build(self):
@@ -59,6 +61,7 @@ class GameGUIClient(App):
 
                 print(incoming.TAG)
                 if incoming.TAG == 'ALLOWJOINGAME':
+                    self.gui_client.player_name = incoming.name
                     self.is_named = True
                     print('welcome ' + incoming.name)
 
@@ -67,11 +70,18 @@ class GameGUIClient(App):
 
                 elif incoming.TAG == 'TEAMSELECTED':
                     self.team = incoming.text_message
-                    print(str(self.team))
-                    print(str(type(self.team)))
                     self.gui_client.root.lobby.change_team(self.team)
+
                 elif incoming.TAG == "CODEMASTER":
                     self.gui_client.root.lobby.codemaster(incoming.text_message)
+                    self.gui_client.is_codemaster = incoming.text_message
+
+                elif incoming.TAG == 'LOBBYTEAMUPDATE':
+                    # [team num]:name
+                    team = int(incoming.text_message.split(':')[0])
+                    nm = incoming.text_message.split(':')[1]
+                    self.gui_client.root.lobby.adjust_teams(nm, team)
+
                 elif incoming.TAG == 'STARTGAME':
                     # open gameboard
                     print(len(incoming.board.board[0]))
@@ -79,12 +89,6 @@ class GameGUIClient(App):
                     self.gui_client.root.go_to_game(incoming.board.board,
                                                     (not incoming.text_message and self.gui_client.team == '0') or (incoming.text_message and self.gui_client.team == '1'))
 
-
-                    # # todo make nicer + fix logic
-                    # if (not incoming.text_message and self.gui_client.team == '0') or (incoming.text_message and self.gui_client.team == '1'):
-                    #     self.gui_client.root.gamegui.word_board.set_initial_board(incoming.board, True)
-                    # else:
-                    #     self.gui_client.root.gamegui.word_board.set_initial_board(incoming.board, False)
 
                 elif incoming.TAG == 'BOARDUPDATE':
                     print('updating board')
@@ -116,10 +120,16 @@ class GameGUIClient(App):
                     which_screen = incoming.text_message.split(';')[0]
                     names_str = incoming.text_message.split(';')[1]
 
+                    # modify string to add 'you' and 'cm' (codemaster)
+                    str_to_add = ' (you)'
+
+                    i = names_str.index(self.gui_client.player_name) + len(self.gui_client.player_name)
+                    names_str = names_str[:i] + str_to_add + names_str[i:]
+
                     if which_screen == 'game':
                         self.gui_client.root.gamegui.game_chat.update_participants(names_str)
-                    # todo
-
+                    elif which_screen == 'lobby':
+                        self.gui_client.root.lobby.readd_all_participants(names_str)
 
 
                 elif incoming.TAG == 'CHAT':

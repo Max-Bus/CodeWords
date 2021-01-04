@@ -150,6 +150,22 @@ class ServerClientHandler(Thread):
                     else:
                         print(request.name + ' had joined private room ' + request.text_message + '.')
 
+                    # tell gui to add player's name to the screen
+                    participants_string = 'lobby;'
+                    for cl_listener in self.client_list:
+                        name = cl_listener.client.username
+
+                        team_num = cl_listener.client.team
+                        participants_string += str(team_num) + ':' + name + ','
+
+                    # remove comma at the end
+                    participants_string = participants_string[:-1]
+
+                    self.broadcast(Message(TAG='UPDATEPARTICIPANTS', text_message=participants_string), False)
+
+                    # name_str = 'lobby;' + str(self.client.team) + ':' + self.client.username
+                    # self.broadcast(Message(TAG='UPDATEPARTICIPANTS', text_message=name_str), False)
+
                     continue
 
                 elif request.TAG=="CHAT":
@@ -169,7 +185,13 @@ class ServerClientHandler(Thread):
                     #self.client.team = request.text_message
                     self.client.team = (1 + self.client.team) % 2
                     print("new team:"+str(self.client.team))
+
+                    # [team num]:name
                     self.send_msg(Message(TAG='TEAMSELECTED', text_message=self.client.team))
+
+                    # tell everyone to update their lobby participants
+                    txtmsg = str(self.client.team) + ':' + self.client.username
+                    self.broadcast(Message(TAG='LOBBYTEAMUPDATE', text_message=txtmsg), False)
 
                 elif request.TAG == "CHOOSECODEMASTER":
                     # todo team is a number right? + check for teamates?
@@ -192,6 +214,22 @@ class ServerClientHandler(Thread):
                         else:
                             self.send_msg(Message(TAG="CODEMASTER",text_message=False))
 
+                    # notify everyone of the codemaster so they can update the gui
+                    participants_string = 'lobby;'
+                    for cl_listener in self.client_list:
+                        name = cl_listener.client.username
+                        if cl_listener.client.is_codemaster:
+                            name += ' (cm)'
+
+                        team_num = cl_listener.client.team
+                        participants_string += str(team_num) + ':' + name + ','
+
+                    # remove comma at the end
+                    participants_string = participants_string[:-1]
+
+                    self.broadcast(Message(TAG='UPDATEPARTICIPANTS', text_message=participants_string), False)
+
+
 
                 elif request.TAG == 'STARTGAME':
                     team_0_ready = False
@@ -213,15 +251,12 @@ class ServerClientHandler(Thread):
                                     self.boardClone.board[i][j].selected = True
                         self.broadcast(Message(TAG='STARTGAME', board=self.boardClone, text_message=True),False)
 
-                    # todo sending names of participants
-                    print('server: updating participants')
                     # send list of participants
                     participants_string = 'game;'
                     for cl_listener in self.client_list:
                         name = cl_listener.client.username
-                        print(name)
-                        if name == self.client.username:
-                            name += '(you)'
+                        if cl_listener.client.is_codemaster:
+                            name += ' (cm)'
 
                         team_num = cl_listener.client.team
                         participants_string += str(team_num) + ':' + name + ','
@@ -232,7 +267,6 @@ class ServerClientHandler(Thread):
                     self.broadcast(Message(TAG='UPDATEPARTICIPANTS', text_message=participants_string), False)
 
 
-                # todo perhaps consider renaming this
                 elif request.TAG == "GAMEREQUEST":
                     print(request.move)
                     if(self.client.team is None):
