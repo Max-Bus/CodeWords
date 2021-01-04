@@ -250,6 +250,8 @@ class ServerClientHandler(Thread):
                                     self.boardClone.board[i][j].color = self.board.board[i][j].color
                                     self.boardClone.board[i][j].selected = True
                         self.broadcast(Message(TAG='STARTGAME', board=self.boardClone, text_message=True),False)
+                    else:
+                        continue
 
                     # send list of participants
                     participants_string = 'game;'
