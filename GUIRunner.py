@@ -211,19 +211,18 @@ class GameGUI(GridLayout):
         self.left_side.cols = 1
         self.left_side.rows = 2
         self.word_board = WordBoard(self.socket, board_dims, is_turn)
+        self.word_board.size_hint = (1, 0.7)
         self.hint_area = HintArea()
+        self.hint_area.size_hint = (1, 0.3)
         self.left_side.add_widget(self.word_board)
         self.left_side.add_widget(self.hint_area)
+        self.left_side.size_hint = (0.6, 1)
         self.add_widget(self.left_side)
 
         self.game_chat = GameChat(self.socket)
-        self.game_chat.size_hint = (None, None)
+        self.game_chat.size_hint = (0.4, 1)
 
         self.add_widget(self.game_chat)
-        self.game_chat.width = self.game_chat.parent.width * 2
-        self.game_chat.height = self.game_chat.parent.height * 8
-
-        self.left_side.size = (self.left_side.parent.width, self.left_side.parent.height)
 
     def win_lose(self,win):
         self.popup = Popup(title="Private Lobby")
@@ -299,6 +298,12 @@ class HintArea(GridLayout):
     def receive_hint(self, word, count):
         self.current_hint.text = word + ", " + str(count)
 
+    def prompt_hint(self, name, reds_turn):
+        if (reds_turn):
+            self.current_hint.text = "RED - " + name + "'s turn to give a hint"
+        else:
+            self.current_hint.text = "BLUE - " + name + "'s turn to give a hint"
+
 class GameChat(GridLayout):
     def __init__(self, socket, **kwargs):
         super(GameChat, self).__init__(**kwargs)
@@ -311,16 +316,22 @@ class GameChat(GridLayout):
         self.participant_area.add_widget(self.red_participants)
         self.blue_participants = Label(text="blue\n")
         self.participant_area.add_widget(self.blue_participants)
+        self.participant_area.size_hint = (1, 0.3)
         self.add_widget(self.participant_area)
 
         self.chat_log = TextInput(multiline=True,readonly=True)
+        self.chat_log.size_hint = (1, 0.65)
         self.add_widget(self.chat_log)
 
-        self.message_bar = TextInput(multiline=True)
         self.message_area = GridLayout(rows=1,cols=2)
+        self.message_bar = TextInput(multiline=True)
+        self.message_bar.size_hint = (0.8, 1)
         self.message_area.add_widget(self.message_bar)
         self.message_button = Button(text="Send", on_press=self.chat)
+        self.message_button.size_hint = (0.2, 1)
+        self.message_area.size_hint = (1, 0.05)
         self.message_area.add_widget(self.message_button)
+
         self.add_widget(self.message_area)
 
     def display(self,msg):

@@ -99,6 +99,7 @@ class GameGUIClient(App):
                     else:
                         self.gui_client.root.gamegui.win_lose(incoming.text_message==self.team)
                         self.gui_client.root.go_to_lobby()
+
                 elif incoming.TAG == "CLUE":
                     word = incoming.text_message.split(" ")
                     word.append("")
@@ -157,5 +158,5 @@ class GameGUIClient(App):
             self.gui_client.socket.sendall(serialized_msg)
 
 if __name__ == "__main__":
-    gui = GameGUIClient('ec2-13-58-169-82.us-east-2.compute.amazonaws.com', 59001)
+    gui = GameGUIClient('localhost', 54321)
     gui.run()
