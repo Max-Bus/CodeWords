@@ -86,7 +86,7 @@ class GameGUIClient(App):
                     # open gameboard
                     print(len(incoming.board.board[0]))
                     self.in_game = True
-                    self.gui_client.root.go_to_game(incoming.board.board,self.gui_client.is_codemaster)
+                    self.gui_client.root.go_to_game(incoming.board.board,incoming.board.turn==self.team,self.gui_client.is_codemaster)
 
 
                 elif incoming.TAG == 'BOARDUPDATE':

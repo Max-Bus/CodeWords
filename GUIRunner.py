@@ -244,9 +244,10 @@ class GameGUI(GridLayout):
 
 class WordBoard(GridLayout):
 
-    def __init__(self, socket, board,is_codemaster, **kwargs):
+    def __init__(self, socket, board,is_turn,is_codemaster, **kwargs):
         super(WordBoard, self).__init__(**kwargs)
         self.socket = socket
+        self.is_turn =is_turn
         self.cols = len(board[0])
         self.rows = len(board)
         self.btn_board = [(['temp'] * self.cols) for row in range(self.rows)]
@@ -385,9 +386,9 @@ class FullGUI(GridLayout):
         self.add_widget(self.lobby)
         self.do_layout()
 
-    def go_to_game(self, board, is_codemaster):
+    def go_to_game(self, board,is_turn,is_codemaster):
         self.remove_widget(self.lobby)
-        self.gamegui = GameGUI(self.socket, board,is_codemaster)
+        self.gamegui = GameGUI(self.socket, board,is_turn,is_codemaster)
         self.add_widget(self.gamegui)
         self.do_layout()
 
