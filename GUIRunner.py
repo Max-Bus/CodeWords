@@ -201,7 +201,7 @@ class Lobby(GridLayout):
             self.codemaster_button.text = "Become Codemaster"
 
 class GameGUI(GridLayout):
-    def __init__(self, socket, board_dims, is_turn, is_codemaster, **kwargs):
+    def __init__(self, socket, board_dims, is_codemaster, **kwargs):
         super(GameGUI, self).__init__(**kwargs)
         self.socket = socket
         self.cols = 2
@@ -210,7 +210,7 @@ class GameGUI(GridLayout):
         self.left_side = GridLayout()
         self.left_side.cols = 1
         self.left_side.rows = 2
-        self.word_board = WordBoard(self.socket, board_dims, is_turn, is_codemaster)
+        self.word_board = WordBoard(self.socket, board_dims, is_codemaster)
         self.word_board.size_hint = (1, 0.7)
         self.hint_area = HintArea()
         self.hint_area.size_hint = (1, 0.3)
@@ -244,10 +244,9 @@ class GameGUI(GridLayout):
 
 class WordBoard(GridLayout):
 
-    def __init__(self, socket, board,is_turn,is_codemaster, **kwargs):
+    def __init__(self, socket, board, is_codemaster, **kwargs):
         super(WordBoard, self).__init__(**kwargs)
         self.socket = socket
-        self.is_turn =is_turn
         self.cols = len(board[0])
         self.rows = len(board)
         self.btn_board = [(['temp'] * self.cols) for row in range(self.rows)]
@@ -257,14 +256,15 @@ class WordBoard(GridLayout):
                 # if is player's team's turn, send move; if not, send None
                 b = Button(text=board[i][j].word,
                            on_press=lambda event, i=i, j=j:
-                           send_msg(self.socket, Message(TAG='GAMEREQUEST', move=(i, j))) if self.is_turn else None)
+                           send_msg(self.socket, Message(TAG='GAMEREQUEST', move=(i, j))))
 
                 self.add_widget(b)
                 self.btn_board[i][j] = b
-        self.update_board(board,is_codemaster)
+        self.update_board(board, is_codemaster)
 
     # todo update board
-    def update_board(self, board,is_codemaster):
+    def update_board(self, board, is_codemaster):
+
         opacity = 1
         if(is_codemaster):
             opacity = 0.25
@@ -386,9 +386,9 @@ class FullGUI(GridLayout):
         self.add_widget(self.lobby)
         self.do_layout()
 
-    def go_to_game(self, board,is_turn,is_codemaster):
+    def go_to_game(self, board, is_codemaster):
         self.remove_widget(self.lobby)
-        self.gamegui = GameGUI(self.socket, board,is_turn,is_codemaster)
+        self.gamegui = GameGUI(self.socket, board, is_codemaster)
         self.add_widget(self.gamegui)
         self.do_layout()
 

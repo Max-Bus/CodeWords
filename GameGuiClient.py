@@ -43,6 +43,9 @@ class GameGUIClient(App):
             self.is_named = False
             self.in_game = False
 
+            self.cm_names = []
+            self.cm_teams = []
+
         def __call__(self):
 
             incoming = 'temp'
@@ -86,7 +89,7 @@ class GameGUIClient(App):
                     # open gameboard
                     print(len(incoming.board.board[0]))
                     self.in_game = True
-                    self.gui_client.root.go_to_game(incoming.board.board,incoming.board.turn==self.team,self.gui_client.is_codemaster)
+                    self.gui_client.root.go_to_game(incoming.board.board, self.gui_client.is_codemaster)
 
 
                 elif incoming.TAG == 'BOARDUPDATE':
@@ -94,9 +97,9 @@ class GameGUIClient(App):
                     print(str(incoming.text_message))
                     if(incoming.text_message is None):
                         #todo
-                        self.gui_client.root.gamegui.word_board.update_board(incoming.board.board,False)
+                        self.gui_client.root.gamegui.word_board.update_board(incoming.board.board, False)
                     else:
-                        self.gui_client.root.gamegui.win_lose(incoming.text_message==self.team)
+                        self.gui_client.root.gamegui.win_lose(incoming.text_message == self.team)
                         self.gui_client.root.go_to_lobby()
 
                 elif incoming.TAG == "PROMPTCLUE":
@@ -122,6 +125,16 @@ class GameGUIClient(App):
 
                     which_screen = incoming.text_message.split(';')[0]
                     names_str = incoming.text_message.split(';')[1]
+
+                    cm_names = []
+                    cm_teams = []
+                    for person in names_str.split(','):
+                        if '(cm)' in person:
+                            cm_teams.append(int(person.split(':')[0]))
+                            cm_names.append(person.split(':')[1])
+
+                    self.cm_names = cm_names
+                    self.cm_teams = cm_teams
 
                     # modify string to add 'you' and 'cm' (codemaster)
                     str_to_add = ' (you)'
