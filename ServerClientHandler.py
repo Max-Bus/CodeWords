@@ -52,7 +52,7 @@ class ServerClientHandler(Thread):
                 recipient.send_msg(message)
 
     def send_msg(self,msg):
-        time.sleep(0.01)
+        time.sleep(0.05)
         # serialize message
         serialized_msg = pickle.dumps(msg)
         # get size (represented as int 8 bytes) of message in bytes
@@ -89,8 +89,10 @@ class ServerClientHandler(Thread):
 
         if (self.board.board[turn[0]][turn[1]].color != self.client.team):
             self.server.turn(self.room)
-            self.boardClone.turn = (self.boardClone.turn+1)%2
-            self.clued = False
+            for recipient in self.client_list:
+                recipient.boardClone.turn = (recipient.boardClone.turn+1)%2
+                if recipient.client.is_codemaster and recipient.client.team != self.client.team:
+                    recipient.clued = False
             msg = Message(TAG="PROMPTCLUE", board=self.boardClone, text_message=str(self.boardClone.turn))
             self.broadcast(msg, False)
 
@@ -273,6 +275,10 @@ class ServerClientHandler(Thread):
                         self.clued = True
                         msg = Message(TAG="CLUE",text_message=request.text_message)
                         self.broadcast(msg,False)
+
+                elif request.TAG == "PROMPTCLUE":
+                    if self.client.is_codemaster and self.board.turn == self.client.team and not self.clued:
+                        self.clued = False
 
                 elif request.TAG == "LEAVE":
                     # this function should be locked

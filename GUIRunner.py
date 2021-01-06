@@ -19,7 +19,7 @@ class StartMenu(GridLayout):
         self.client_socket = socket
         self.cols = 1
         self.rows = 3
-        self.padding = (150, 100, 150, 200)
+        self.padding = (100, 100, 100, 100)
         self.spacing = 10
         self.add_widget(Label(text="Codewords"))
 
@@ -293,7 +293,7 @@ class HintArea(GridLayout):
         self.cols = 1
         self.rows = 1
 
-        self.current_hint = Label(text="")
+        self.current_hint = Label(text="", markup=True)
         self.add_widget(self.current_hint)
 
     def receive_hint(self, word, count):
@@ -301,9 +301,9 @@ class HintArea(GridLayout):
 
     def prompt_hint(self, name, blues_turn):
         if (blues_turn):
-            self.current_hint.text = "BLUE - " + name + "'s turn to give a hint"
+            self.current_hint.text = "[color=#0000ff]BLUE - " + name + "'s turn to give a hint[/color]"
         else:
-            self.current_hint.text = "RED - " + name + "'s turn to give a hint"
+            self.current_hint.text = "[color=#ff0000]RED - " + name + "'s turn to give a hint[/color]"
 
 class GameChat(GridLayout):
     def __init__(self, socket, **kwargs):
