@@ -91,7 +91,6 @@ class GameGUIClient(App):
                     self.in_game = True
                     self.gui_client.root.go_to_game(incoming.board.board, self.gui_client.is_codemaster)
 
-
                 elif incoming.TAG == 'BOARDUPDATE':
                     print('updating board')
                     print(str(incoming.text_message))
@@ -103,7 +102,7 @@ class GameGUIClient(App):
                         self.gui_client.root.go_to_lobby()
 
                 elif incoming.TAG == "PROMPTCLUE":
-                    self.gui_client.root.gamegui.hint_area.prompt_hint("person", int(incoming.text_message) == 0)
+                    self.gui_client.root.gamegui.hint_area.prompt_hint(incoming.text_message, incoming.board == 0)
 
                 elif incoming.TAG == "CLUE":
                     word = incoming.text_message.split(" ")

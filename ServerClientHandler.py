@@ -52,7 +52,7 @@ class ServerClientHandler(Thread):
                 recipient.send_msg(message)
 
     def send_msg(self,msg):
-        time.sleep(0.05)
+        time.sleep(0.15)
         # serialize message
         serialized_msg = pickle.dumps(msg)
         # get size (represented as int 8 bytes) of message in bytes
@@ -89,11 +89,13 @@ class ServerClientHandler(Thread):
 
         if (self.board.board[turn[0]][turn[1]].color != self.client.team):
             self.server.turn(self.room)
+            codemaster_name = ""
             for recipient in self.client_list:
                 recipient.boardClone.turn = (recipient.boardClone.turn+1)%2
                 if recipient.client.is_codemaster and recipient.client.team != self.client.team:
                     recipient.clued = False
-            msg = Message(TAG="PROMPTCLUE", board=self.boardClone, text_message=str(self.boardClone.turn))
+                    codemaster_name = recipient.client.username
+            msg = Message(TAG="PROMPTCLUE", board=self.boardClone.turn, text_message=codemaster_name)
             self.broadcast(msg, False)
 
         self.boardClone.board[turn[0]][turn[1]].color=self.board.board[turn[0]][turn[1]].color
@@ -261,6 +263,13 @@ class ServerClientHandler(Thread):
                     participants_string = participants_string[:-1]
 
                     self.broadcast(Message(TAG='UPDATEPARTICIPANTS', text_message=participants_string), False)
+
+                    # sends the initial hint prompt since the rest are triggers by wrong guesses
+                    codemaster_name = ""
+                    for recipient in self.client_list:
+                        if recipient.client.is_codemaster and recipient.client.team != self.client.team:
+                            codemaster_name = recipient.client.username
+                    self.broadcast(Message(TAG='PROMPTCLUE', board=self.boardClone.turn, text_message=codemaster_name), False)
 
 
                 elif request.TAG == "GAMEREQUEST":

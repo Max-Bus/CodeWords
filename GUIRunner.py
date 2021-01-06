@@ -267,7 +267,7 @@ class WordBoard(GridLayout):
 
         opacity = 1
         if(is_codemaster):
-            opacity = 0.25
+            opacity = 0.5
 
         for row in range(len(board)):
             for col in range(len(board[0])):
@@ -275,11 +275,11 @@ class WordBoard(GridLayout):
                     color_int = board[row][col].color
                     color = None
                     if color_int == 1:
-                        color = (1, 0, 0, opacity)
+                        color = (1, 0, 0.25, opacity)
                     elif color_int == 0:
-                        color = (0, 0, 1, opacity)
+                        color = (0.25, 0, 1, opacity)
                     elif color_int == -1:
-                        color = (0.5, 0.5, 0.5, opacity)
+                        color = (0.5, 0.5, 0.75, opacity)
                     else:
                         color = (1, 1, 1, 1)
 
@@ -292,18 +292,24 @@ class HintArea(GridLayout):
         super(HintArea, self).__init__(**kwargs)
         self.cols = 1
         self.rows = 1
+        self.blues_turn = -1
 
         self.current_hint = Label(text="", markup=True)
         self.add_widget(self.current_hint)
 
     def receive_hint(self, word, count):
         self.current_hint.text = word + ", " + str(count)
+        if (self.blues_turn):
+            self.current_hint.text = "[color=#8888ff]" + word + ", " + str(count) + "[/color]"
+        else:
+            self.current_hint.text = "[color=#ff8888]" + word + ", " + str(count) + "[/color]"
 
     def prompt_hint(self, name, blues_turn):
+        self.blues_turn = blues_turn
         if (blues_turn):
-            self.current_hint.text = "[color=#0000ff]BLUE - " + name + "'s turn to give a hint[/color]"
+            self.current_hint.text = "[color=#8888ff]" + name + "'s turn to give a hint.[/color]"
         else:
-            self.current_hint.text = "[color=#ff0000]RED - " + name + "'s turn to give a hint[/color]"
+            self.current_hint.text = "[color=#ff8888]" + name + "'s turn to give a hint.[/color]"
 
 class GameChat(GridLayout):
     def __init__(self, socket, **kwargs):
@@ -312,7 +318,7 @@ class GameChat(GridLayout):
         self.rows = 3
         self.socket = socket
 
-        self.participant_area = GridLayout(rows=1,cols=2)
+        self.participant_area = GridLayout(rows=1, cols=2)
         self.red_participants = Label(text="red\n")
         self.participant_area.add_widget(self.red_participants)
         self.blue_participants = Label(text="blue\n")
@@ -320,11 +326,11 @@ class GameChat(GridLayout):
         self.participant_area.size_hint = (1, 0.3)
         self.add_widget(self.participant_area)
 
-        self.chat_log = TextInput(multiline=True,readonly=True)
+        self.chat_log = TextInput(multiline=True, readonly=True)
         self.chat_log.size_hint = (1, 0.65)
         self.add_widget(self.chat_log)
 
-        self.message_area = GridLayout(rows=1,cols=2)
+        self.message_area = GridLayout(rows=1, cols=2)
         self.message_bar = TextInput(multiline=True)
         self.message_bar.size_hint = (0.8, 1)
         self.message_area.add_widget(self.message_bar)
@@ -335,9 +341,9 @@ class GameChat(GridLayout):
 
         self.add_widget(self.message_area)
 
-    def display(self,msg):
+    def display(self, msg):
         print("here")
-        self.chat_log.text += (msg+"\n")
+        self.chat_log.text += msg + "\n"
 
     def update_participants(self, names_str):
         # [team num]:name1,[team num]:name2,[team num]:name3....
