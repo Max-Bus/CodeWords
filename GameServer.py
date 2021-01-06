@@ -24,7 +24,9 @@ class Server:
         self.lock = threading.Lock()
     def start_game(self,room):
         self.lock.acquire()
+        print(ROOMS)
         ROOMS[room][2]=True
+        print('ROOMS')
         board = ROOMS[room][1]
         client_list = ROOMS[room][0]
         cm_board = board.copy()
@@ -62,7 +64,7 @@ class Server:
 
             new_room = "!"+result_str
             board = Board(5)
-            ROOMS[new_room] = ([client],board,False)
+            ROOMS[new_room] = [[client],board,False]
             PUBLIC_ROOMS.append(new_room)
             self.lock.release()
             return (ROOMS[new_room],new_room)
@@ -75,7 +77,7 @@ class Server:
         else:
             new_room = room
             board = Board(5)
-            ROOMS[new_room] = ([client], board,False)
+            ROOMS[new_room] = [[client], board, False]
             self.lock.release()
             return (ROOMS[new_room],new_room)
 
