@@ -3,6 +3,7 @@ from concurrent.futures import ThreadPoolExecutor
 from ServerClientHandler import ServerClientHandler
 from ClientConnectionData import ClientConnectionData
 from Board import Board
+from Message import *
 import random
 import string
 import socket
@@ -21,7 +22,24 @@ P_LENGTH = 8
 class Server:
     def __init__(self):
         self.lock = threading.Lock()
-
+    def start_game(self,room):
+        self.lock.acquire()
+        board = ROOMS[room][1]
+        client_list = ROOMS[room][0]
+        cm_board = board.copy()
+        p_board = board.copy()
+        for i in range(len(board.board)):
+            for j in range(len(board.board)):
+                cm_board.board[i][j].selected = True
+                p_board.board[i][j].color=-1
+        for client in client_list:
+            if(client.client.is_codemaster):
+                client.boardClone = cm_board.copy()
+                client.send_msg(Message(TAG="STARTGAME",board=cm_board))
+            else:
+                client.boardClone = p_board.copy()
+                client.send_msg(Message(TAG="STARTGAME", board=p_board))
+        self.lock.release()
     def join_make_room(self,client, room):
 
         self.lock.acquire()

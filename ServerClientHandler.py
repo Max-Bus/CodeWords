@@ -139,12 +139,6 @@ class ServerClientHandler(Thread):
                     info, self.room = self.server.join_make_room(self, request.text_message)
                     self.client_list = info[0]
                     self.board = info[1]
-                    self.boardClone = self.board.copy()
-                    print(self.boardClone.board)
-                    for i in range(len(self.boardClone.board)):
-                        for j in range(len(self.boardClone.board[i])):
-                            if(not self.boardClone.board[i][j].selected):
-                                self.boardClone.board[i][j].color=0
                     self.send_msg(Message(TAG='GOTOLOBBY',text_message=self.client.team))
 
                     # log on server
@@ -245,12 +239,7 @@ class ServerClientHandler(Thread):
 
                     if(team_0_ready and team_1_ready):
                         # distribute initial board
-                        if (self.client.is_codemaster):
-                            for i in range(len(self.board.board)):
-                                for j in range(len(self.board.board[i])):
-                                    self.boardClone.board[i][j].color = self.board.board[i][j].color
-                                    self.boardClone.board[i][j].selected = True
-                        self.broadcast(Message(TAG='STARTGAME', board=self.boardClone, text_message=True),False)
+                        self.server.start_game(self.room)
                     else:
                         continue
 
