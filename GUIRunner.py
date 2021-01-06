@@ -244,10 +244,9 @@ class GameGUI(GridLayout):
 
 class WordBoard(GridLayout):
 
-    def __init__(self, socket, board, is_turn, **kwargs):
+    def __init__(self, socket, board,is_codemaster, **kwargs):
         super(WordBoard, self).__init__(**kwargs)
         self.socket = socket
-        self.is_turn = is_turn
         self.cols = len(board[0])
         self.rows = len(board)
         self.btn_board = [(['temp'] * self.cols) for row in range(self.rows)]
@@ -261,12 +260,13 @@ class WordBoard(GridLayout):
 
                 self.add_widget(b)
                 self.btn_board[i][j] = b
-        self.update_board(board,False)
+        self.update_board(board,is_codemaster)
 
     # todo update board
-    def update_board(self, board, switch_turns):
-        if switch_turns:
-            self.is_turn = not self.is_turn
+    def update_board(self, board,is_codemaster):
+        opacity = 1
+        if(is_codemaster):
+            opacity = 0.25
 
         for row in range(len(board)):
             for col in range(len(board[0])):
@@ -274,11 +274,11 @@ class WordBoard(GridLayout):
                     color_int = board[row][col].color
                     color = None
                     if color_int == 1:
-                        color = (1, 0, 0, 1)
+                        color = (1, 0, 0, opacity)
                     elif color_int == 0:
-                        color = (0, 0, 1, 1)
+                        color = (0, 0, 1, opacity)
                     elif color_int == -1:
-                        color = (0.5, 0.5, 0.5, 0.5)
+                        color = (0.5, 0.5, 0.5, opacity)
                     else:
                         color = (1, 1, 1, 1)
 
@@ -385,9 +385,9 @@ class FullGUI(GridLayout):
         self.add_widget(self.lobby)
         self.do_layout()
 
-    def go_to_game(self, board, is_turn):
+    def go_to_game(self, board, is_codemaster):
         self.remove_widget(self.lobby)
-        self.gamegui = GameGUI(self.socket, board, is_turn)
+        self.gamegui = GameGUI(self.socket, board,is_codemaster)
         self.add_widget(self.gamegui)
         self.do_layout()
 

@@ -86,14 +86,17 @@ class ServerClientHandler(Thread):
                     break
         if (Win):
             winner = self.client.team
+
+        if (self.board.board[turn[0]][turn[1]].color != self.client.team):
+            self.server.turn(self.room)
+            self.boardClone.turn = (self.boardClone.turn+1)%2
+            self.clued = False
+
         self.boardClone.board[turn[0]][turn[1]].color=self.board.board[turn[0]][turn[1]].color
         self.boardClone.board[turn[0]][turn[1]].selected = True
         msg = Message(TAG="BOARDUPDATE", board=self.boardClone,text_message=winner)
         self.broadcast(msg, False)
 
-        if (self.board.board[turn[0]][turn[1]].color != self.client.team):
-            self.server.turn(self.room)
-            self.clued = False
 
 
     def get_msg(self):
@@ -201,8 +204,6 @@ class ServerClientHandler(Thread):
                     else:
                         team = True
                         for client in self.client_list:
-                            print(client.client.team)
-                            print(self.client.team)
                             if(client.client.team == self.client.team):
                                 if(client.client.is_codemaster):
                                     team=False
