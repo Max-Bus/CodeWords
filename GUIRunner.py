@@ -201,7 +201,7 @@ class Lobby(GridLayout):
             self.codemaster_button.text = "Become Codemaster"
 
 class GameGUI(GridLayout):
-    def __init__(self, socket, board_dims, is_turn, **kwargs):
+    def __init__(self, socket, board_dims, is_turn, is_codemaster, **kwargs):
         super(GameGUI, self).__init__(**kwargs)
         self.socket = socket
         self.cols = 2
@@ -210,7 +210,7 @@ class GameGUI(GridLayout):
         self.left_side = GridLayout()
         self.left_side.cols = 1
         self.left_side.rows = 2
-        self.word_board = WordBoard(self.socket, board_dims, is_turn)
+        self.word_board = WordBoard(self.socket, board_dims, is_turn, is_codemaster)
         self.word_board.size_hint = (1, 0.7)
         self.hint_area = HintArea()
         self.hint_area.size_hint = (1, 0.3)
