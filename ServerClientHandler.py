@@ -91,6 +91,8 @@ class ServerClientHandler(Thread):
             self.server.turn(self.room)
             self.boardClone.turn = (self.boardClone.turn+1)%2
             self.clued = False
+            msg = Message(TAG="PROMPTCLUE", board=self.boardClone, text_message=str(self.boardClone.turn))
+            self.broadcast(msg, False)
 
         self.boardClone.board[turn[0]][turn[1]].color=self.board.board[turn[0]][turn[1]].color
         self.boardClone.board[turn[0]][turn[1]].selected = True

@@ -299,11 +299,11 @@ class HintArea(GridLayout):
     def receive_hint(self, word, count):
         self.current_hint.text = word + ", " + str(count)
 
-    def prompt_hint(self, name, reds_turn):
-        if (reds_turn):
-            self.current_hint.text = "RED - " + name + "'s turn to give a hint"
-        else:
+    def prompt_hint(self, name, blues_turn):
+        if (blues_turn):
             self.current_hint.text = "BLUE - " + name + "'s turn to give a hint"
+        else:
+            self.current_hint.text = "RED - " + name + "'s turn to give a hint"
 
 class GameChat(GridLayout):
     def __init__(self, socket, **kwargs):

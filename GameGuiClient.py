@@ -99,6 +99,9 @@ class GameGUIClient(App):
                         self.gui_client.root.gamegui.win_lose(incoming.text_message==self.team)
                         self.gui_client.root.go_to_lobby()
 
+                elif incoming.TAG == "PROMPTCLUE":
+                    self.gui_client.root.gamegui.hint_area.prompt_hint("person", int(incoming.text_message) == 0)
+
                 elif incoming.TAG == "CLUE":
                     word = incoming.text_message.split(" ")
                     word.append("")
