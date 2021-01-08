@@ -9,7 +9,6 @@ import string
 import socket
 import threading
 
-
 print('server started')
 
 # create thread, add it to the executor, and it runs? maybe theres a better way
@@ -61,7 +60,6 @@ class Server:
             # code from pynative.com
             letters = string.ascii_letters
             result_str = ''.join(random.choice(letters) for i in range(P_LENGTH))
-
             new_room = "!"+result_str
             board = Board(5)
             ROOMS[new_room] = [[client],board,False]
@@ -77,7 +75,7 @@ class Server:
         else:
             new_room = room
             board = Board(5)
-            ROOMS[new_room] = [[client], board, False]
+            ROOMS[new_room] = [Array(client,1), board, False]
             self.lock.release()
             return (ROOMS[new_room],new_room)
 

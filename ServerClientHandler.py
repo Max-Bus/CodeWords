@@ -1,3 +1,4 @@
+import threading
 from threading import Thread
 import pickle
 import socket
@@ -23,6 +24,7 @@ class ServerClientHandler(Thread):
         self.server = server
         self.clued = False
         self.boardClone = None
+        self.lock = threading.Lock()
 
     def broadcast(self,msg,team):
         print(msg.TAG)
@@ -102,6 +104,9 @@ class ServerClientHandler(Thread):
         self.boardClone.board[turn[0]][turn[1]].selected = True
         msg = Message(TAG="BOARDUPDATE", board=self.boardClone,text_message=winner)
         self.broadcast(msg, False)
+        if(winner!=None):
+            for c in self.client_list:
+                c.leave()
 
 
 
@@ -120,7 +125,14 @@ class ServerClientHandler(Thread):
         request = pickle.loads(data)
 
         return request
-
+    def leave(self):
+        print('error: ' + str(self.client.ip_address) + ' leaving room')
+        x = self.server.leave_room(self, self.room)
+        if x:
+            print(str(self.client.ip_address) + " Exited successfully")
+        else:
+            print(str(self.client.ip_address) + " Failed to exit room")
+            print("shutting down connection")
     def run(self):
         try:
             print('i am here ')
@@ -139,6 +151,7 @@ class ServerClientHandler(Thread):
                     if(request.TAG=="CHAT" and not self.clued and self.board.turn == self.client.team):
                         request.TAG="CLUE"
                 if request.TAG == "JOIN":
+                    self.lock.acquire()
                     # this function should be locked
                     #self.send_msg(Message(TAG='GOTOLOBBY'))
                     self.client.team = random.choice([0,1])
@@ -168,7 +181,7 @@ class ServerClientHandler(Thread):
 
                     # name_str = 'lobby;' + str(self.client.team) + ':' + self.client.username
                     # self.broadcast(Message(TAG='UPDATEPARTICIPANTS', text_message=name_str), False)
-
+                    self.lock.release()
                     continue
 
                 elif request.TAG=="CHAT":
@@ -183,6 +196,7 @@ class ServerClientHandler(Thread):
                     self.privatebroadcast(recipients,request)
 
                 elif request.TAG == "SWITCHTEAM":
+                    self.lock.acquire()
                     #if(self.client.team != request.text_message):
                     self.client.is_codemaster = False
                     #self.client.team = request.text_message
@@ -195,8 +209,9 @@ class ServerClientHandler(Thread):
                     # tell everyone to update their lobby participants
                     txtmsg = str(self.client.team) + ':' + self.client.username
                     self.broadcast(Message(TAG='LOBBYTEAMUPDATE', text_message=txtmsg), False)
-
+                    self.lock.release()
                 elif request.TAG == "CHOOSECODEMASTER":
+                    self.lock.acquire()
                     # todo team is a number right? + check for teamates?
                     if(self.client.is_codemaster):
                         self.client.is_codemaster=False
@@ -214,7 +229,7 @@ class ServerClientHandler(Thread):
                             self.send_msg(Message(TAG="CODEMASTER", text_message=True))
                         else:
                             self.send_msg(Message(TAG="CODEMASTER",text_message=False))
-
+                    self.lock.release()
                     # notify everyone of the codemaster so they can update the gui
                     participants_string = 'lobby;'
                     for cl_listener in self.client_list:
@@ -231,8 +246,8 @@ class ServerClientHandler(Thread):
                     self.broadcast(Message(TAG='UPDATEPARTICIPANTS', text_message=participants_string), False)
 
 
-
                 elif request.TAG == 'STARTGAME':
+                    self.lock.acquire()
                     team_0_ready = False
                     team_1_ready = False
                     print(self.client_list)
@@ -270,7 +285,7 @@ class ServerClientHandler(Thread):
                         if recipient.client.is_codemaster and recipient.client.team == self.boardClone.turn:
                             codemaster_name = recipient.client.username
                     self.broadcast(Message(TAG='PROMPTCLUE', board=self.boardClone.turn, text_message=codemaster_name), False)
-
+                    self.lock.release()
 
                 elif request.TAG == "GAMEREQUEST":
                     print(request.move)
@@ -290,9 +305,11 @@ class ServerClientHandler(Thread):
                         self.clued = False
 
                 elif request.TAG == "PASS":
+                    self.lock.acquire()
                     if not self.client.is_codemaster and self.board.turn == self.client.team:
                         self.server.turn(self.room)
                         codemaster_name = ""
+                        self.server.turn(self.room)
                         for recipient in self.client_list:
                             recipient.boardClone.turn = (recipient.boardClone.turn + 1) % 2
                             if recipient.client.is_codemaster and recipient.client.team != self.client.team:
@@ -302,7 +319,7 @@ class ServerClientHandler(Thread):
                         self.broadcast(msg, False)
                         msg = Message(TAG="BOARDUPDATE", board=self.boardClone, text_message=None)
                         self.broadcast(msg, False)
-
+                    self.lock.release()
                 elif request.TAG == "LEAVE":
                     # this function should be locked
                     self.server.leave_room(self.client, self.room)
@@ -335,13 +352,7 @@ class ServerClientHandler(Thread):
 
 
         except socket.error:
-            print('error: ' + str(self.client.ip_address) + ' leaving room')
-            x = self.server.leave_room(self, self.room)
-            if x:
-                print(str(self.client.ip_address)+" Exited successfully")
-            else:
-                print(str(self.client.ip_address)+" Failed to exit room")
-                print("shutting down connection")
+            self.leave()
             return
 
         return
