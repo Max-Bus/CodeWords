@@ -75,7 +75,7 @@ class Server:
         else:
             new_room = room
             board = Board(5)
-            ROOMS[new_room] = [Array(client,1), board, False]
+            ROOMS[new_room] = [[client], board, False]
             self.lock.release()
             return (ROOMS[new_room],new_room)
 
