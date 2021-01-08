@@ -307,7 +307,6 @@ class ServerClientHandler(Thread):
                 elif request.TAG == "PASS":
                     self.lock.acquire()
                     if not self.client.is_codemaster and self.board.turn == self.client.team:
-                        self.server.turn(self.room)
                         codemaster_name = ""
                         self.server.turn(self.room)
                         for recipient in self.client_list:
