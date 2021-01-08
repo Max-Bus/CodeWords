@@ -267,7 +267,7 @@ class ServerClientHandler(Thread):
                     # sends the initial hint prompt since the rest are triggers by wrong guesses
                     codemaster_name = ""
                     for recipient in self.client_list:
-                        if recipient.client.is_codemaster and recipient.client.team != self.client.team:
+                        if recipient.client.is_codemaster and recipient.client.team == self.boardClone.turn:
                             codemaster_name = recipient.client.username
                     self.broadcast(Message(TAG='PROMPTCLUE', board=self.boardClone.turn, text_message=codemaster_name), False)
 
@@ -288,6 +288,20 @@ class ServerClientHandler(Thread):
                 elif request.TAG == "PROMPTCLUE":
                     if self.client.is_codemaster and self.board.turn == self.client.team and not self.clued:
                         self.clued = False
+
+                elif request.TAG == "PASS":
+                    if not self.client.is_codemaster and self.board.turn == self.client.team:
+                        self.server.turn(self.room)
+                        codemaster_name = ""
+                        for recipient in self.client_list:
+                            recipient.boardClone.turn = (recipient.boardClone.turn + 1) % 2
+                            if recipient.client.is_codemaster and recipient.client.team != self.client.team:
+                                recipient.clued = False
+                                codemaster_name = recipient.client.username
+                        msg = Message(TAG="PROMPTCLUE", board=self.boardClone.turn, text_message=codemaster_name)
+                        self.broadcast(msg, False)
+                        msg = Message(TAG="BOARDUPDATE", board=self.boardClone, text_message=None)
+                        self.broadcast(msg, False)
 
                 elif request.TAG == "LEAVE":
                     # this function should be locked

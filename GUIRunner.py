@@ -73,6 +73,7 @@ class StartMenu(GridLayout):
         self.popup.content = content
         content.cols = 2
         content.rows = 2
+        content.padding = 100
         content.add_widget(Label(text="Name:"))
 
         self.name_input = TextInput(multiline=False)
@@ -99,9 +100,9 @@ class Lobby(GridLayout):
         self.blue_names = []
 
         self.participant_area = GridLayout(rows=1, cols=2)
-        self.red_participants = Label(text="red\n")
+        self.red_participants = Label(text="\nRED\n")
         self.participant_area.add_widget(self.red_participants)
-        self.blue_participants = Label(text="blue\n")
+        self.blue_participants = Label(text="\nRED\n")
         self.participant_area.add_widget(self.blue_participants)
         self.add_widget(self.participant_area)
 
@@ -142,8 +143,8 @@ class Lobby(GridLayout):
 
     # redraws the names (in case of team switch etc.)
     def update_participants(self):
-        redtxt = 'red\n'
-        bluetxt = 'blue\n'
+        redtxt = '\nRED\n'
+        bluetxt = '\nBLUE\n'
 
         print(self.red_names)
         for person in self.red_names:
@@ -281,7 +282,7 @@ class WordBoard(GridLayout):
                     elif color_int == -1:
                         color = (0.5, 0.5, 0.75, opacity)
                     else:
-                        color = (1, 1, 1, 1)
+                        color = (0.25, 0.75, 0.25, opacity)
 
                     self.btn_board[row][col].background_color = color
 
@@ -319,9 +320,9 @@ class GameChat(GridLayout):
         self.socket = socket
 
         self.participant_area = GridLayout(rows=1, cols=2)
-        self.red_participants = Label(text="red\n")
+        self.red_participants = Label(text="\nRED\n", halign='center', valign='middle')
         self.participant_area.add_widget(self.red_participants)
-        self.blue_participants = Label(text="blue\n")
+        self.blue_participants = Label(text="\nBLUE\n", halign='center', valign='middle')
         self.participant_area.add_widget(self.blue_participants)
         self.participant_area.size_hint = (1, 0.3)
         self.add_widget(self.participant_area)
@@ -330,15 +331,23 @@ class GameChat(GridLayout):
         self.chat_log.size_hint = (1, 0.65)
         self.add_widget(self.chat_log)
 
-        self.message_area = GridLayout(rows=1, cols=2)
-        self.message_bar = TextInput(multiline=True)
-        self.message_bar.size_hint = (0.8, 1)
+        self.message_area = GridLayout(rows=1, cols=3)
+
+        self.pass_button = Button(text="Pass",
+                                    on_press = lambda event:
+                                    send_msg(self.socket, Message(TAG='PASS')))
+        self.pass_button.size_hint = (0.15, 1)
+        self.message_area.add_widget(self.pass_button)
+
+        self.message_bar = TextInput(multiline=False)
+        self.message_bar.size_hint = (0.7, 1)
         self.message_area.add_widget(self.message_bar)
+
         self.message_button = Button(text="Send", on_press=self.chat)
-        self.message_button.size_hint = (0.2, 1)
-        self.message_area.size_hint = (1, 0.05)
+        self.message_button.size_hint = (0.15, 1)
         self.message_area.add_widget(self.message_button)
 
+        self.message_area.size_hint = (1, 0.05)
         self.add_widget(self.message_area)
 
     def display(self, msg):
