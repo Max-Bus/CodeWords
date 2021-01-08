@@ -392,6 +392,11 @@ class FullGUI(GridLayout):
         self.gamegui = None
         self.add_widget(self.start_menu)
 
+    def go_to_start(self):
+        self.remove_widget(self.gamegui)
+        self.add_widget(self.start_menu)
+        self.do_layout()
+
     def go_to_lobby(self):
         self.start_menu.scrub()
         self.remove_widget(self.start_menu)

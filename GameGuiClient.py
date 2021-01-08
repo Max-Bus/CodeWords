@@ -99,7 +99,7 @@ class GameGUIClient(App):
                         self.gui_client.root.gamegui.word_board.update_board(incoming.board.board, False)
                     else:
                         self.gui_client.root.gamegui.win_lose(incoming.text_message == self.team)
-                        self.gui_client.root.go_to_lobby()
+                        self.gui_client.root.go_to_start()
 
                 elif incoming.TAG == "PROMPTCLUE":
                     self.gui_client.root.gamegui.hint_area.prompt_hint(incoming.text_message, incoming.board == 0)
@@ -159,7 +159,7 @@ class GameGUIClient(App):
                     print(incoming.text_message)
 
         def send(self, msg):
-            time.sleep(0.01)
+            time.sleep(0.1)
             # serialize message
             serialized_msg = pickle.dumps(msg)
             # get size (represented as int 8 bytes) of message in bytes
@@ -172,5 +172,5 @@ class GameGUIClient(App):
             self.gui_client.socket.sendall(serialized_msg)
 
 if __name__ == "__main__":
-    gui = GameGUIClient('localhost', 54321)
+    gui = GameGUIClient('localhost', 59001)
     gui.run()
